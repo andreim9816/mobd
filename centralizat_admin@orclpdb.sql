@@ -12,25 +12,31 @@ drop sequence clasa_zbor_seq;
 drop sequence metoda_plata_seq;
 
 CREATE TABLE AERONAVA(
-    aeronava_ID varchar2(40),
+    aeronava_id varchar2(40) PRIMARY KEY,
     producator VARCHAR2(60),
     nume VARCHAR2(60)
 );
 
 CREATE TABLE STAT(
-    stat_id VARCHAR2(3),
-    state VARCHAR2(30)
+    stat_id VARCHAR2(3) PRIMARY KEY,
+    stat VARCHAR2(30)
 );
 
-CREATE TABLE OPERATOR_ZBOR
-    (operator_id VARCHAR2(3) PRIMARY KEY,
-     nume VARCHAR2(50) ,
-     tip VARCHAR2(15)
+CREATE TABLE DESTINATIE
+    (destinatie_id VARCHAR2(4) PRIMARY KEY,
+     oras VARCHAR2(60) NOT NULL,
+     stat_id VARCHAR2(5) NOT NULL  REFERENCES STAT(stat_id) ON DELETE CASCADE
+);
+
+CREATE TABLE OPERATOR_ZBOR(
+    operator_id VARCHAR2(3) PRIMARY KEY,
+    nume VARCHAR2(50) ,
+    tip VARCHAR2(15)
 );
      
-CREATE TABLE METODA_PLATA
-    (metoda_plata_id NUMBER(2) PRIMARY KEY,
-     denumire VARCHAR2(30) NOT NULL
+CREATE TABLE METODA_PLATA(
+    metoda_plata_id NUMBER(2) PRIMARY KEY,
+    denumire VARCHAR2(30) NOT NULL
 );
      
 CREATE SEQUENCE metoda_plata_seq 
@@ -40,6 +46,8 @@ INCREMENT BY 1;
 INSERT INTO METODA_PLATA VALUES(metoda_plata_seq.NEXTVAL, 'CASH');
 INSERT INTO METODA_PLATA VALUES(metoda_plata_seq.NEXTVAL, 'CARD');
 INSERT INTO METODA_PLATA VALUES(metoda_plata_seq.NEXTVAL, 'TRANSFER BANCAR');
+
+SELECT * FROM metoda_plata;
      
 CREATE TABLE CLASA_ZBOR
     (clasa_zbor_id NUMBER(2) PRIMARY KEY,
@@ -54,11 +62,13 @@ INSERT INTO CLASA_ZBOR VALUES(clasa_zbor_seq.NEXTVAL, 'FIRST');
 INSERT INTO CLASA_ZBOR VALUES(clasa_zbor_seq.NEXTVAL, 'BUSINESS');
 INSERT INTO CLASA_ZBOR VALUES(clasa_zbor_seq.NEXTVAL, 'ECONOMY');
 
+SELECT * FROM clasa_zbor;
+
 CREATE TABLE PLATA
     (plata_id NUMBER(10) PRIMARY KEY,
     suma_totala NUMBER(7),
-    data_plata DATE,
-    metoda_plata_id NUMBER(2)
+    data_plata TIMESTAMP,
+    metoda_plata_id NUMBER(2) REFERENCES METODA_PLATA(metoda_plata_id)
 );   
 
 CREATE TABLE CLIENT
@@ -71,16 +81,11 @@ CREATE TABLE CLIENT
      data_inregistrare DATE
 );
 
-CREATE TABLE DESTINATIE
-    (destinatie_id VARCHAR2(4) PRIMARY KEY,
-     oras VARCHAR2(60) NOT NULL,
-     stat_ID VARCHAR2(5) NOT NULL
-);
 
 CREATE TABLE ZBOR(
      zbor_id NUMBER(8) PRIMARY KEY,
      operator_id VARCHAR2(20) REFERENCES OPERATOR_ZBOR(operator_id) ON DELETE CASCADE,
-     aeronava_id VARCHAR2(20),
+     aeronava_id VARCHAR2(20) REFERENCES AERONAVA(aeronava_id) ON DELETE CASCADE,
      durata NUMBER(4) NOT NULL,
      distanta NUMBER(4) NOT NULL,
      total_locuri NUMBER(4) NOT NULL, 
@@ -90,6 +95,8 @@ CREATE TABLE ZBOR(
      locatie_plecare_id VARCHAR2(4) REFERENCES DESTINATIE(destinatie_id) ON DELETE CASCADE,
      locatie_sosire_id VARCHAR2(4) REFERENCES DESTINATIE(destinatie_id) ON DELETE CASCADE
 );
+
+DELETE FROM ZBOR;
 
 CREATE TABLE REZERVARE(
      rezervare_id  NUMBER(8) PRIMARY KEY,
