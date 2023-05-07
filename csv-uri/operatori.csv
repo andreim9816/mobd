@@ -1,0 +1,15 @@
+operator_id,nume,tip
+UA,United Air Lines Inc.,Non low cost
+AA,American Airlines Inc.,Non low cost
+US,US Airways Inc.,Non low cost
+F9,Frontier Airlines Inc., Low cost
+B6,JetBlue Airways, Low cost
+OO,Skywest Airlines Inc.,Non low cost
+AS,Alaska Airlines Inc.,Non low cost
+NK,Spirit Air Lines, Low cost
+WN,Southwest Airlines Co., Low cost
+DL,Delta Air Lines Inc.,Non low cost
+EV,Atlantic Southeast Airlines,Non low cost
+HA,Hawaiian Airlines Inc.,Non low cost
+MQ,American Eagle Airlines Inc.,Non low cost
+VX,Virgin America,Non low cost
