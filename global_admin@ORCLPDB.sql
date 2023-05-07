@@ -1,6 +1,5 @@
 --II.2) Crearea relatiilor si a fragmentelor
 
-
 CREATE TABLE CLIENT(
     client_id NUMBER(8),
     client_premium NUMBER(1),

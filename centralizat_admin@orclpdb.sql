@@ -1,10 +1,3 @@
-CREATE DATABASE LINK non_lowcost
-CONNECT TO bdd_admin
-IDENTIFIED BY bdd_admin 
-USING 'orclpdb_2';
-
-select * from tab@non_lowcost;
-
 drop table rezervare;
 drop table plata;
 drop table aeronava;
@@ -20,8 +13,8 @@ drop sequence metoda_plata_seq;
 
 CREATE TABLE AERONAVA(
     aeronava_ID varchar2(40),
-    manufacturer VARCHAR2(60),
-    aircraft_Name VARCHAR2(60)
+    producator VARCHAR2(60),
+    nume VARCHAR2(60)
 );
 
 CREATE TABLE STAT(
@@ -31,8 +24,8 @@ CREATE TABLE STAT(
 
 CREATE TABLE OPERATOR_ZBOR
     (operator_id VARCHAR2(3) PRIMARY KEY,
-     nume VARCHAR2(50) NOT NULL,
-     low_cost NUMBER(1)
+     nume VARCHAR2(50) ,
+     tip VARCHAR2(15)
 );
      
 CREATE TABLE METODA_PLATA
@@ -78,7 +71,6 @@ CREATE TABLE CLIENT
      data_inregistrare DATE
 );
 
-
 CREATE TABLE DESTINATIE
     (destinatie_id VARCHAR2(4) PRIMARY KEY,
      oras VARCHAR2(60) NOT NULL,
@@ -99,7 +91,6 @@ CREATE TABLE ZBOR(
      locatie_sosire_id VARCHAR2(4) REFERENCES DESTINATIE(destinatie_id) ON DELETE CASCADE
 );
 
-
 CREATE TABLE REZERVARE(
      rezervare_id  NUMBER(8) PRIMARY KEY,
      nr_pasageri NUMBER(2) NOT NULL CHECK(nr_pasageri > 0),
@@ -112,3 +103,7 @@ CREATE TABLE REZERVARE(
      plata_id NUMBER(10) REFERENCES plata(plata_id) ON DELETE CASCADE
 );
 
+CREATE DATABASE LINK non_lowcost
+CONNECT TO bdd_admin
+IDENTIFIED BY bdd_admin 
+USING 'orclpdb_2';

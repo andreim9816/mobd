@@ -78,4 +78,6 @@ CONNECT TO bdd_admin
 IDENTIFIED BY bdd_admin 
 USING 'orclpdb';
 
+SELECT * FROM centralizat_admin.aeronava@lowcost;
+select * From all_users order by created desc;
 select * from tab@lowcost;
