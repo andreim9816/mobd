@@ -102,8 +102,3 @@ CREATE TABLE REZERVARE(
      clasa_zbor_id NUMBER(2) REFERENCES CLASA_ZBOR(clasa_zbor_id) ON DELETE CASCADE,
      plata_id NUMBER(10) REFERENCES plata(plata_id) ON DELETE CASCADE
 );
-
-CREATE DATABASE LINK non_lowcost
-CONNECT TO bdd_admin
-IDENTIFIED BY bdd_admin 
-USING 'orclpdb_2';
