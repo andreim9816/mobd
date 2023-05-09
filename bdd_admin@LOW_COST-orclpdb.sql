@@ -26,30 +26,30 @@ ORCLPDB_2 =
 
 -- II.2) Crearea relatiiloe si a fragmentelor
 
+drop table operator_zbor_lowcost;
+drop table zbor_lowcost;
 drop table rezervare_lowcost;
 drop table plata_lowcost;
-drop table aeronava_lowcost;
-drop table stat_lowcost;
-drop table zbor_lowcost;
-drop table operator_zbor_lowcost;
-drop table metoda_plata_lowcost;
-drop table clasa_zbor_lowcost;
-drop table client_nongdpr_lowcost;
-drop table destinatie_lowcost;
+drop table client_nongdpr;
+drop table aeronava;
+drop table stat;
+drop table metoda_plata;
+drop table clasa_zbor;
+drop table destinatie;
 
 -- crearea tabelelor
-CREATE TABLE AERONAVA_LOWCOST(
+CREATE TABLE AERONAVA(
     aeronava_id varchar2(40),
     producator VARCHAR2(60),
     nume VARCHAR2(60)
 );
 
-CREATE TABLE STAT_LOWCOST(
+CREATE TABLE STAT(
     stat_id VARCHAR2(3),
     stat VARCHAR2(30)
 );
 
-CREATE TABLE DESTINATIE_LOWCOST
+CREATE TABLE DESTINATIE
     (destinatie_id VARCHAR2(4),
      oras VARCHAR2(60),
      stat_id VARCHAR2(5) 
@@ -61,12 +61,12 @@ CREATE TABLE OPERATOR_ZBOR_LOWCOST
      tip VARCHAR2(15)
 );
      
-CREATE TABLE METODA_PLATA_LOWCOST
+CREATE TABLE METODA_PLATA
     (metoda_plata_id NUMBER(2),
      denumire VARCHAR2(30)
 );
 
-CREATE TABLE CLASA_ZBOR_LOWCOST
+CREATE TABLE CLASA_ZBOR
     (clasa_zbor_id NUMBER(2),
      denumire VARCHAR2(20)
 );
@@ -78,7 +78,7 @@ CREATE TABLE PLATA_LOWCOST
     metoda_plata_id NUMBER(2)
 );   
 
-CREATE TABLE CLIENT_NONGDPR_LOWCOST(
+CREATE TABLE CLIENT_NONGDPR(
     client_id NUMBER(8),
     premium NUMBER,
     data_inregistrare DATE
@@ -269,10 +269,11 @@ SELECT * FROM plata_nonlowcost@non_lowcost;
 
 
 ---- FRAGMENTARE VERTICALA
-INSERT INTO client_nongdpr_lowcost
+INSERT INTO client_nongdpr
 SELECT client_id, client_premium, data_inregistrare 
 FROM centralizat_admin.client;
 
-SELECT * FROM client_nongdpr_lowcost;
-COMMIT;
+SELECT * FROM client_nongdpr;
+
+
 

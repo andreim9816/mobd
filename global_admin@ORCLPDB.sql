@@ -23,11 +23,11 @@ FROM centralizat_admin.client;
 SELECT * FROM client_gdpr;
 
 -- reconstructia
-SELECT * FROM bdd_admin.client_nongdpr_lowcost;
+SELECT * FROM bdd_admin.client_nongdpr;
 
 SELECT gdpr.*, nongdpr.premium, nongdpr.data_inregistrare
 FROM client_gdpr gdpr
-JOIN bdd_admin.client_nongdpr_lowcost nongdpr
+JOIN bdd_admin.client_nongdpr nongdpr
 ON (gdpr.client_id = nongdpr.client_id);
 
 -- completitudinea
@@ -38,7 +38,7 @@ FROM centralizat_admin.client
 MINUS
 (SELECT gdpr.*, nongdpr.premium, nongdpr.data_inregistrare
 FROM client_gdpr gdpr
-JOIN bdd_admin.client_nongdpr_lowcost nongdpr
+JOIN bdd_admin.client_nongdpr nongdpr
 ON (gdpr.client_id = nongdpr.client_id));
 
 -- disjunctia - coloanele vor fi vide
@@ -49,7 +49,7 @@ AND column_name <> 'CLIENT_ID'
 INTERSECT
 SELECT column_name
 FROM user_tab_columns
-WHERE table_name = UPPER('client_nongdpr_lowcost')
+WHERE table_name = UPPER('client_nongdpr')
 AND column_name <> 'CLIENT_ID';
 
 -- II.3) Furnizarea formelor de transparenta pentru intreg modelul ales
@@ -118,10 +118,10 @@ SELECT * FROM plata;
 
 -- Metoda Plata
 CREATE OR REPLACE SYNONYM metoda_plata_lowcost
-FOR bdd_admin.metoda_plata_lowcost;
+FOR bdd_admin.metoda_plata;
 
 CREATE OR REPLACE SYNONYM metoda_plata_nonlowcost
-FOR bdd_admin.metoda_plata_nonlowcost@non_lowcost;
+FOR bdd_admin.metoda_plata@non_lowcost;
 
 CREATE OR REPLACE VIEW metoda_plata
 AS
@@ -133,10 +133,10 @@ SELECT * FROM metoda_plata;
 
 -- Clasa zbor
 CREATE OR REPLACE SYNONYM clasa_zbor_lowcost
-FOR bdd_admin.clasa_zbor_lowcost;
+FOR bdd_admin.clasa_zbor;
 
 CREATE OR REPLACE SYNONYM clasa_zbor_nonlowcost
-FOR bdd_admin.clasa_zbor_nonlowcost@non_lowcost;
+FOR bdd_admin.clasa_zbor@non_lowcost;
 
 CREATE OR REPLACE VIEW clasa_zbor
 AS
@@ -148,10 +148,10 @@ SELECT * FROM clasa_zbor;
 
 -- Aeronava
 CREATE OR REPLACE SYNONYM aeronava_lowcost
-FOR bdd_admin.aeronava_lowcost;
+FOR bdd_admin.aeronava;
 
 CREATE OR REPLACE SYNONYM aeronava_nonlowcost
-FOR bdd_admin.aeronava_nonlowcost@non_lowcost;
+FOR bdd_admin.aeronava@non_lowcost;
 
 CREATE OR REPLACE VIEW aeronava
 AS
@@ -163,10 +163,10 @@ SELECT * FROM aeronava;
 
 -- Destinatie
 CREATE OR REPLACE SYNONYM destinatie_lowcost
-FOR bdd_admin.destinatie_lowcost;
+FOR bdd_admin.destinatie;
 
 CREATE OR REPLACE SYNONYM destinatie_nonlowcost
-FOR bdd_admin.destinatie_nonlowcost@non_lowcost;
+FOR bdd_admin.destinatie@non_lowcost;
 
 CREATE OR REPLACE VIEW destinatie
 AS
@@ -178,10 +178,10 @@ SELECT * FROM destinatie;
 
 -- Stat
 CREATE OR REPLACE SYNONYM stat_lowcost
-FOR bdd_admin.stat_lowcost;
+FOR bdd_admin.stat;
 
 CREATE OR REPLACE SYNONYM stat_nonlowcost
-FOR bdd_admin.stat_nonlowcost@non_lowcost;
+FOR bdd_admin.stat@non_lowcost;
 
 CREATE OR REPLACE VIEW stat
 AS
@@ -193,10 +193,10 @@ SELECT * FROM stat;
 
 -- Client
 CREATE OR REPLACE SYNONYM client_nongdpr_lowcost
-FOR bdd_admin.client_nongdpr_lowcost;
+FOR bdd_admin.client_nongdpr;
 
 CREATE OR REPLACE SYNONYM client_nongdpr_nonlowcost
-FOR bdd_admin.client_nongdpr_nonlowcost@non_lowcost;
+FOR bdd_admin.client_nongdpr@non_lowcost;
 
 CREATE OR REPLACE VIEW client_nongdpr
 AS

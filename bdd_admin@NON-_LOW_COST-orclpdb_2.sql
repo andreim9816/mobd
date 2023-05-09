@@ -22,31 +22,30 @@ SELECT * FROM tab@centralizat;
 SELECT OWNER, USERNAME, DB_LINK, HOST
 FROM ALL_DB_LINKS;
 
-
+drop table operator_zbor_nonlowcost;
+drop table zbor_nonlowcost;
 drop table rezervare_nonlowcost;
 drop table plata_nonlowcost;
-drop table aeronava_nonlowcost;
-drop table stat_nonlowcost;
-drop table zbor_nonlowcost;
-drop table operator_zbor_nonlowcost;
-drop table metoda_plata_nonlowcost;
-drop table clasa_zbor_nonlowcost;
-drop table client_nongdpr_nonlowcost;
-drop table destinatie_nonlowcost;
+drop table client_nongdpr;
+drop table aeronava;
+drop table stat;
+drop table metoda_plata;
+drop table clasa_zbor;
+drop table destinatie;
 
 -- crearea tabelelor
-CREATE TABLE AERONAVA_NONLOWCOST(
+CREATE TABLE AERONAVA(
     aeronava_id varchar2(40),
     producator VARCHAR2(60),
     nume VARCHAR2(60)
 );
 
-CREATE TABLE STAT_NONLOWCOST(
+CREATE TABLE STAT(
     stat_id VARCHAR2(3),
     stat VARCHAR2(30)
 );
 
-CREATE TABLE DESTINATIE_NONLOWCOST
+CREATE TABLE DESTINATIE
     (destinatie_id VARCHAR2(4),
      oras VARCHAR2(60),
      stat_id VARCHAR2(5) 
@@ -58,12 +57,12 @@ CREATE TABLE OPERATOR_ZBOR_NONLOWCOST
      tip VARCHAR2(15)
 );
      
-CREATE TABLE METODA_PLATA_NONLOWCOST
+CREATE TABLE METODA_PLATA
     (metoda_plata_id NUMBER(2),
      denumire VARCHAR2(30)
 );
 
-CREATE TABLE CLASA_ZBOR_NONLOWCOST
+CREATE TABLE CLASA_ZBOR
     (clasa_zbor_id NUMBER(2),
      denumire VARCHAR2(20)
 );
@@ -75,7 +74,7 @@ CREATE TABLE PLATA_NONLOWCOST
     metoda_plata_id NUMBER(2)
 );   
 
-CREATE TABLE CLIENT_NONGDPR_NONLOWCOST (
+CREATE TABLE CLIENT_NONGDPR (
     client_id NUMBER(8),
     premium NUMBER,
     data_inregistrare DATE
@@ -145,3 +144,5 @@ JOIN rezervare_nonlowcost r
 ON (r.plata_id = p.plata_id);
 
 SELECT * FROM plata_nonlowcost;
+
+COMMIT;
