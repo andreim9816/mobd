@@ -13,13 +13,13 @@ drop sequence metoda_plata_seq;
 
 CREATE TABLE AERONAVA(
     aeronava_id varchar2(40) PRIMARY KEY,
-    producator VARCHAR2(60),
-    nume VARCHAR2(60)
+    producator VARCHAR2(60) NOT NULL,
+    nume VARCHAR2(60) NOT NULL
 );
 
 CREATE TABLE STAT(
     stat_id VARCHAR2(3) PRIMARY KEY,
-    stat VARCHAR2(30)
+    stat VARCHAR2(30) NOT NULL
 );
 
 CREATE TABLE DESTINATIE
@@ -30,8 +30,8 @@ CREATE TABLE DESTINATIE
 
 CREATE TABLE OPERATOR_ZBOR(
     operator_id VARCHAR2(3) PRIMARY KEY,
-    nume VARCHAR2(50) ,
-    tip VARCHAR2(15)
+    nume VARCHAR2(50) NOT NULL UNIQUE,
+    tip VARCHAR2(15) NOT NULL
 );
      
 CREATE TABLE METODA_PLATA(
@@ -66,8 +66,8 @@ SELECT * FROM clasa_zbor;
 
 CREATE TABLE PLATA
     (plata_id NUMBER(10) PRIMARY KEY,
-    suma_totala NUMBER(7),
-    data_plata TIMESTAMP,
+    suma_totala NUMBER(7) NOT NULL,
+    data_plata TIMESTAMP NOT NULL,
     metoda_plata_id NUMBER(2) REFERENCES METODA_PLATA(metoda_plata_id)
 );   
 
@@ -77,8 +77,8 @@ CREATE TABLE CLIENT
      prenume VARCHAR2(30) NOT NULL,
      email VARCHAR2(40) NOT NULL,
      numar_telefon VARCHAR2(30) NOT NULL,
-     client_premium NUMBER(1),
-     data_inregistrare DATE
+     client_premium NUMBER(1) CHECK (client_premium IN (0, 1)),
+     data_inregistrare DATE NOT NULL
 );
 
 
