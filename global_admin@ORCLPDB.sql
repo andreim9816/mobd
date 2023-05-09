@@ -1,9 +1,11 @@
 --II.2) Crearea relatiilor si a fragmentelor
 
-CREATE TABLE CLIENT(
-    client_id NUMBER(8),
-    client_premium NUMBER(1),
-    data_inregistrare DATE
+CREATE TABLE CLIENT_GDPR
+    (client_id NUMBER(8) PRIMARY KEY,
+     nume VARCHAR2(20) NOT NULL,
+     prenume VARCHAR2(30) NOT NULL,
+     email VARCHAR2(40) NOT NULL,
+     numar_telefon VARCHAR2(30) NOT NULL
 );
 
 CREATE DATABASE LINK non_lowcost
@@ -12,6 +14,43 @@ IDENTIFIED BY bdd_admin
 USING 'orclpdb_2';
 
 select * from tab@non_lowcost;
+
+-- CREARE FRAGMENT VERTICAL GDPR
+INSERT INTO client_gdpr
+SELECT client_id, nume, prenume, email, numar_telefon
+FROM centralizat_admin.client;
+
+SELECT * FROM client_gdpr;
+
+-- reconstructia
+SELECT * FROM bdd_admin.client_nongdpr_lowcost;
+
+SELECT gdpr.*, nongdpr.premium, nongdpr.data_inregistrare
+FROM client_gdpr gdpr
+JOIN bdd_admin.client_nongdpr_lowcost nongdpr
+ON (gdpr.client_id = nongdpr.client_id);
+
+-- completitudinea
+SELECT * FROM centralizat_admin.client;
+
+SELECT *
+FROM centralizat_admin.client
+MINUS
+(SELECT gdpr.*, nongdpr.premium, nongdpr.data_inregistrare
+FROM client_gdpr gdpr
+JOIN bdd_admin.client_nongdpr_lowcost nongdpr
+ON (gdpr.client_id = nongdpr.client_id));
+
+-- disjunctia - coloanele vor fi vide
+SELECT column_name
+FROM user_tab_columns
+WHERE table_name = UPPER('client_gdpr')
+AND column_name <> 'CLIENT_ID'
+INTERSECT
+SELECT column_name
+FROM user_tab_columns
+WHERE table_name = UPPER('client_nongdpr_lowcost')
+AND column_name <> 'CLIENT_ID';
 
 -- II.3) Furnizarea formelor de transparenta pentru intreg modelul ales
 -- Pentru fiecare tabela (care se afla in aceeasi baza de date sau nu) se creeaza un sinonim corespunzator, respectiv o vizualizare

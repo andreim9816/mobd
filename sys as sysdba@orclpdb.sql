@@ -41,7 +41,7 @@ WHERE grantee IN ('BDD_ADMIN', 'CENTRALIZAT_ADMIN', 'GLOBAL_ADMIN')
 ORDER BY 1;
 
 
--- Userul bdd_admin trebuie sa primeasca acces la tabelele din schema utilizatorului centralizat_admin
+-- Userii bdd_admin si global_admin trebuie sa primeasca acces la tabelele din schema utilizatorului centralizat_admin
 CREATE OR REPLACE PROCEDURE grant_select(
     p_username VARCHAR2, 
     p_grantee VARCHAR2)
@@ -81,7 +81,8 @@ END;
 /
 
 BEGIN
-    grant_select('centralizat_admin','bdd_admin'); 
+    grant_select('centralizat_admin','bdd_admin');
+    grant_select('centralizat_admin', 'global_admin');
 END;
 /
 

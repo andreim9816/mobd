@@ -267,3 +267,12 @@ SELECT * FROM plata_lowcost
 INTERSECT
 SELECT * FROM plata_nonlowcost@non_lowcost;
 
+
+---- FRAGMENTARE VERTICALA
+INSERT INTO client_nongdpr_lowcost
+SELECT client_id, client_premium, data_inregistrare 
+FROM centralizat_admin.client;
+
+SELECT * FROM client_nongdpr_lowcost;
+COMMIT;
+
