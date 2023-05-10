@@ -61,7 +61,7 @@ CREATE OR REPLACE SYNONYM operator_zbor_lowcost
 FOR bdd_admin.operator_zbor_lowcost;
 
 CREATE OR REPLACE SYNONYM operator_zbor_nonlowcost
-FOR bdd_admin.operator_zbor_nonlowcost@non_lowcost;
+FOR operator_zbor@non_lowcost;
 
 CREATE OR REPLACE VIEW operator_zbor
 AS
@@ -76,7 +76,7 @@ CREATE OR REPLACE SYNONYM zbor_lowcost
 FOR bdd_admin.zbor_lowcost;
 
 CREATE OR REPLACE SYNONYM zbor_nonlowcost
-FOR bdd_admin.zbor_nonlowcost@non_lowcost;
+FOR zbor_nonlowcost@non_lowcost;
 
 CREATE OR REPLACE VIEW zbor
 AS
@@ -91,7 +91,7 @@ CREATE OR REPLACE SYNONYM rezervare_lowcost
 FOR bdd_admin.rezervare_lowcost;
 
 CREATE OR REPLACE SYNONYM rezervare_nonlowcost
-FOR bdd_admin.rezervare_nonlowcost@non_lowcost;
+FOR rezervare_nonlowcost@non_lowcost;
 
 CREATE OR REPLACE VIEW rezervare
 AS
@@ -106,7 +106,7 @@ CREATE OR REPLACE SYNONYM plata_lowcost
 FOR bdd_admin.plata_lowcost;
 
 CREATE OR REPLACE SYNONYM plata_nonlowcost
-FOR bdd_admin.plata_nonlowcost@non_lowcost;
+FOR plata_nonlowcost@non_lowcost;
 
 CREATE OR REPLACE VIEW plata
 AS
@@ -121,12 +121,10 @@ CREATE OR REPLACE SYNONYM metoda_plata_lowcost
 FOR bdd_admin.metoda_plata;
 
 CREATE OR REPLACE SYNONYM metoda_plata_nonlowcost
-FOR bdd_admin.metoda_plata@non_lowcost;
+FOR metoda_plata@non_lowcost;
 
 CREATE OR REPLACE VIEW metoda_plata
 AS
-SELECT * FROM metoda_plata_nonlowcost
-UNION ALL 
 SELECT * FROM metoda_plata_lowcost;
 
 SELECT * FROM metoda_plata;
@@ -140,8 +138,6 @@ FOR bdd_admin.clasa_zbor@non_lowcost;
 
 CREATE OR REPLACE VIEW clasa_zbor
 AS
-SELECT * FROM clasa_zbor_nonlowcost
-UNION ALL 
 SELECT * FROM clasa_zbor_lowcost;
 
 SELECT * FROM clasa_zbor;
@@ -155,8 +151,6 @@ FOR bdd_admin.aeronava@non_lowcost;
 
 CREATE OR REPLACE VIEW aeronava
 AS
-SELECT * FROM aeronava_nonlowcost
-UNION ALL 
 SELECT * FROM aeronava_lowcost;
 
 SELECT * FROM aeronava;
@@ -170,8 +164,6 @@ FOR bdd_admin.destinatie@non_lowcost;
 
 CREATE OR REPLACE VIEW destinatie
 AS
-SELECT * FROM destinatie_nonlowcost
-UNION ALL 
 SELECT * FROM destinatie_lowcost;
 
 SELECT * FROM destinatie;
@@ -185,8 +177,6 @@ FOR bdd_admin.stat@non_lowcost;
 
 CREATE OR REPLACE VIEW stat
 AS
-SELECT * FROM stat_nonlowcost
-UNION ALL 
 SELECT * FROM stat_lowcost;
 
 SELECT * FROM stat;
@@ -200,9 +190,7 @@ FOR bdd_admin.client_nongdpr@non_lowcost;
 
 CREATE OR REPLACE VIEW client_nongdpr
 AS
-SELECT * FROM client_nongdpr_lowcost
-UNION ALL 
-SELECT * FROM client_nongdpr_nonlowcost;
+SELECT * FROM client_nongdpr_lowcost;
 
 CREATE OR REPLACE VIEW client
 AS

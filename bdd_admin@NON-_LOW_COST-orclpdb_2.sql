@@ -406,19 +406,31 @@ ORDER BY 1 DESC;
 
 -- Operator Zbor
 CREATE OR REPLACE SYNONYM operator_zbor_lowcost
-FOR bdd_admin.operator_zbor_nonlowcost@lowcost;
+FOR bdd_admin.operator_zbor_lowcost@lowcost;
+
+CREATE OR REPLACE SYNONYM operator_zbor
+FOR operator_zbor_nonlowcost;
 
 -- Zbor
 CREATE OR REPLACE SYNONYM zbor_lowcost
 FOR bdd_admin.zbor_nonlowcost@lowcost;
 
+CREATE OR REPLACE SYNONYM zbor
+FOR zbor_nonlowcost;
+
 -- Rezervare
 CREATE OR REPLACE SYNONYM rezervare_lowcost
 FOR bdd_admin.rezervare_nonlowcost@lowcost;
 
+CREATE OR REPLACE SYNONYM rezervare
+FOR rezervare_nonlowcost;
+
 -- Plata
 CREATE OR REPLACE SYNONYM plata_lowcost
 FOR bdd_admin.plata_nonlowcost@lowcost;
+
+CREATE OR REPLACE SYNONYM plata
+FOR plata_nonlowcost;
 
 -- Metoda Plata
 CREATE OR REPLACE SYNONYM metoda_plata_lowcost

@@ -696,17 +696,29 @@ COMMIT;
 CREATE OR REPLACE SYNONYM operator_zbor_nonlowcost
 FOR bdd_admin.operator_zbor_nonlowcost@non_lowcost;
 
+CREATE OR REPLACE SYNONYM operator_zbor
+FOR operator_zbor_lowcost;
+
 -- Zbor
 CREATE OR REPLACE SYNONYM zbor_nonlowcost
 FOR bdd_admin.zbor_nonlowcost@non_lowcost;
+
+CREATE OR REPLACE SYNONYM zbor
+FOR zbor_lowcost;
 
 -- Rezervare
 CREATE OR REPLACE SYNONYM rezervare_nonlowcost
 FOR bdd_admin.rezervare_nonlowcost@non_lowcost;
 
+CREATE OR REPLACE SYNONYM rezervare
+FOR rezervare_lowcost;
+
 -- Plata
 CREATE OR REPLACE SYNONYM plata_nonlowcost
 FOR bdd_admin.plata_nonlowcost@non_lowcost;
+
+CREATE OR REPLACE SYNONYM plata
+FOR plata_lowcost;
 
 -- Metoda Plata
 CREATE OR REPLACE SYNONYM metoda_plata_nonlowcost
