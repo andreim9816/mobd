@@ -500,6 +500,27 @@ values ( sec_plata_lowcost.nextval, null, CURRENT_TIMESTAMP, null);
 insert into plata_lowcost
 values ( sec_plata_lowcost.nextval, 100, CURRENT_TIMESTAMP, 1);
 
+--constrangeri pentru fragmentul client_nongdpr
+--not null
+ALTER TABLE client_nongdpr
+    add constraint nn_premium_client_nongdpr check (premium is NOT NULL);
+
+ALTER TABLE client_nongdpr
+    add constraint nn_data_client_nongdpr check (data_inregistrare is NOT NULL);
+
+--check
+alter table client_nongdpr
+    add constraint ck_premium_client_nongdpr check(premium in (0,1));
+
+--primary key
+alter table client_nongdpr
+    add constraint pk_client_nongdpr primary key (client_id);
+
+INSERT INTO client_nongdpr VALUES (10001, 1, CURRENT_DATE);
+INSERT INTO client_nongdpr VALUES (10002, 5, CURRENT_DATE);
+INSERT INTO client_nongdpr VALUES (10003, 1, null);
+
+
 
 ----- REPLICAREA
 ----- trigger unidirectional: client nongdpr, stat, metoda plata, clasa zbor

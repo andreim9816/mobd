@@ -8,6 +8,30 @@ CREATE TABLE CLIENT_GDPR
      numar_telefon VARCHAR2(30) NOT NULL
 );
 
+--constrangeri pentru fragmentul client_gdpr
+--not null
+ALTER TABLE client_gdpr
+    add constraint nn_nume_client_gdpr check (nume is NOT NULL);
+
+ALTER TABLE client_gdpr
+    add constraint nn_prenume_client_gdpr check (prenume is NOT NULL);
+
+ALTER TABLE client_gdpr
+    add constraint nn_email_client_gdpr check (email is NOT NULL);
+
+ALTER TABLE client_gdpr
+    add constraint nn_telefon_client_gdpr check (numar_telefon is NOT NULL);
+
+--primary key
+alter table client_gdpr
+    add constraint pk_client_gdpr primary key (client_id);
+
+INSERT INTO client_gdpr VALUES (10001, 'nume', 'prenume', 'email', '438943843');
+INSERT INTO client_gdpr VALUES (10002, null, 'prenume', 'email', '438943843');
+INSERT INTO client_gdpr VALUES (10003, 'nume', null, 'email', '438943843');
+INSERT INTO client_gdpr VALUES (10004, 'nume', 'prenume', null, '438943843');
+INSERT INTO client_gdpr VALUES (10005, 'nume', 'prenume', 'email', null);
+
 CREATE DATABASE LINK non_lowcost
 CONNECT TO bdd_admin
 IDENTIFIED BY bdd_admin 
