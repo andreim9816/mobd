@@ -365,8 +365,27 @@ CREATE OR REPLACE TRIGGER t_client
 INSTEAD OF INSERT OR DELETE ON client
 FOR EACH ROW
 DECLARE
+nr number(1);
 BEGIN
     IF INSERTING THEN
+        select count(*) into nr
+        from  client_nongdpr non, client_gdpr gdpr
+        where non.client_id = gdpr.client_id
+        and non.premium = :new.premium
+        and gdpr.email = :new.email;
+
+        if (nr<>0) then
+             raise_application_error (-20001,'Constangere de unicitate pe email si premium
+             incalcata. Fragmentele contin deja aceste valori');
+        end if;
+
+        if (:new.numar_telefon LIKE '001-%' OR :new.numar_telefon LIKE '+1%') then
+            if (:new.premium = 0) then
+                raise_application_error (-20001,'validare incalcata. Toti clientii din America din Nord
+                (cu prefixul 001 sau +1 la nr de telefon) trebuie sa fie clienti premium');
+            end if;
+        end if;
+
         INSERT INTO client_nongdpr (CLIENT_ID, PREMIUM, DATA_INREGISTRARE)
         VALUES(:new.CLIENT_ID, :new.PREMIUM, :new.DATA_INREGISTRARE);
         
@@ -380,6 +399,12 @@ BEGIN
     END IF;
 END;
 /
+
+select * from client;
+insert into client VALUES (1000000, 0, current_date, 'ceva', 'ceva', 'sherylmurray@example.com', '54546464');
+insert into client VALUES (1000003, 1, current_date, 'ceva', 'ceva', 'sherylmgggurray@example.com', '001-44');
+insert into client VALUES (1000003, 0, current_date, 'ceva', 'ceva', 'sherylmgggurray@example.com', '001-44');
+
 
 CREATE OR REPLACE TRIGGER t_metoda_plata
 INSTEAD OF INSERT OR DELETE ON metoda_plata
