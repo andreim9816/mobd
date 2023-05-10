@@ -147,6 +147,14 @@ SELECT * FROM plata_nonlowcost;
 
 COMMIT;
 
+-- FRAGMENTARE VERTICALA
+INSERT INTO client_nongdpr
+SELECT client_id, client_premium, data_inregistrare 
+FROM client@centralizat;
+
+SELECT * FROM client_nongdpr;
+
+
 --constrangeri pentru fragmentul operator_zbor_nonlow_cost
 --not null
 ALTER TABLE operator_zbor_nonlowcost
@@ -367,3 +375,27 @@ values ( sec_plata_nonlowcost.nextval, null, CURRENT_TIMESTAMP, null);
 
 insert into plata_nonlowcost
 values ( sec_plata_nonlowcost.nextval, 100, CURRENT_TIMESTAMP, 1);
+
+
+--- REPLICARE
+--- metoda plata
+INSERT INTO metoda_plata
+SELECT * FROM metoda_plata@centralizat;
+
+SELECT * FROM metoda_plata;
+
+-- clasa zbor
+INSERT INTO clasa_zbor
+SELECT * FROM clasa_zbor@centralizat;
+
+SELECT * FROM clasa_zbor;
+
+-- stat
+INSERT INTO stat
+SELECT * FROM stat@centralizat;
+
+SELECT * FROM stat;
+
+-- client nongdpr
+SELECT * FROM client_nongdpr 
+ORDER BY 1 DESC;

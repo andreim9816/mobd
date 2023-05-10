@@ -25,6 +25,7 @@ GRANT CREATE SESSION TO administrator;
 GRANT CREATE DATABASE LINK TO administrator;
 GRANT CREATE TABLE TO administrator;
 GRANT CREATE SEQUENCE TO administrator;
+GRANT CREATE TRIGGER TO administrator;
 
 -- afisam rolul creat
 SELECT * FROM role_sys_privs

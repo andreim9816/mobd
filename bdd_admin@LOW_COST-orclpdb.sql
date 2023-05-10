@@ -501,3 +501,189 @@ insert into plata_lowcost
 values ( sec_plata_lowcost.nextval, 100, CURRENT_TIMESTAMP, 1);
 
 
+----- REPLICAREA
+----- trigger unidirectional: client nongdpr, stat, metoda plata, clasa zbor
+----- trigger bidirectional: destinatie
+----- vizualizare materializata pentru tabela din non-low-cost: aeronava
+
+--- inserare date metoda plata si creare trigger
+INSERT INTO metoda_plata
+SELECT * FROM centralizat_admin.metoda_plata;
+
+SELECT * FROM metoda_plata;
+
+CREATE OR REPLACE TRIGGER t_rep_metoda_plata
+AFTER INSERT OR UPDATE OR DELETE ON metoda_plata
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO metoda_plata@non_lowcost
+        VALUES (:NEW.metoda_plata_id, :NEW.denumire);
+    ELSIF DELETING THEN 
+        DELETE FROM metoda_plata@non_lowcost
+        WHERE metoda_plata_id = :OLD.metoda_plata_id;
+    ELSE
+        UPDATE metoda_plata@non_lowcost
+        SET denumire = :NEW.denumire
+        WHERE metoda_plata_id = :OLD.METODA_PLATA_ID;
+    END IF;
+END;
+/
+
+-- verificare inserare
+INSERT INTO metoda_plata
+VALUES (4, 'numerar');
+
+SELECT * FROM metoda_plata;
+COMMIT;
+
+-- verificare update
+UPDATE metoda_plata
+SET denumire = 'NUMERAR'
+WHERE metoda_plata_id = 4;
+
+SELECT * FROM metoda_plata;
+COMMIT;
+
+-- verificare stergere
+DELETE FROM metoda_plata
+WHERE metoda_plata_id = 4;
+
+SELECT * FROM metoda_plata;
+COMMIT;
+
+--- inserare date clasa zbor si creare trigger
+INSERT INTO clasa_zbor
+SELECT * FROM centralizat_admin.clasa_zbor;
+
+SELECT * FROM clasa_zbor;
+
+CREATE OR REPLACE TRIGGER t_rep_clasa_zbor
+AFTER INSERT OR UPDATE OR DELETE ON clasa_zbor
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO clasa_zbor@non_lowcost
+        VALUES (:NEW.clasa_zbor_id, :NEW.denumire);
+    ELSIF DELETING THEN 
+        DELETE FROM clasa_zbor@non_lowcost
+        WHERE clasa_zbor_id = :OLD.clasa_zbor_id;
+    ELSE
+        UPDATE clasa_zbor@non_lowcost
+        SET denumire = :NEW.denumire
+        WHERE clasa_zbor_id = :OLD.clasa_zbor_id;
+    END IF;
+END;
+/
+
+-- verificare inserare
+INSERT INTO clasa_zbor
+VALUES (4, 'Clasa II');
+
+SELECT * FROM clasa_zbor;
+COMMIT;
+
+-- verificare update
+UPDATE clasa_zbor
+SET denumire = 'CLASA II'
+WHERE clasa_zbor_id = 4;
+
+SELECT * FROM clasa_zbor;
+COMMIT;
+
+-- verificare stergere
+DELETE FROM clasa_zbor
+WHERE clasa_zbor_id = 4;
+
+SELECT * FROM clasa_zbor;
+COMMIT;
+
+
+--- inserare date stat si creare trigger
+INSERT INTO stat
+SELECT * FROM centralizat_admin.stat;
+
+SELECT * FROM stat;
+
+CREATE OR REPLACE TRIGGER t_rep_stat
+AFTER INSERT OR UPDATE OR DELETE ON stat
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO stat@non_lowcost
+        VALUES (:NEW.stat_id, :NEW.stat);
+    ELSIF DELETING THEN 
+        DELETE FROM stat@non_lowcost
+        WHERE stat_id = :OLD.stat_id;
+    ELSE
+        UPDATE stat@non_lowcost
+        SET stat = :NEW.stat
+        WHERE stat_id = :OLD.stat_id;
+    END IF;
+END;
+/
+
+-- verificare inserare
+INSERT INTO stat
+VALUES ('NST', 'New state');
+
+SELECT * FROM stat;
+COMMIT;
+
+-- verificare update
+UPDATE stat
+SET stat = 'NEW STATE'
+WHERE stat_id = 'NST';
+
+SELECT * FROM stat;
+COMMIT;
+
+-- verificare stergere
+DELETE FROM stat
+WHERE stat_id = 'NST';
+
+SELECT * FROM stat;
+COMMIT;
+
+--- inserare date client_nongdpr si creare trigger
+SELECT * FROM client_nongdpr;
+
+CREATE OR REPLACE TRIGGER t_rep_client_nongdpr
+AFTER INSERT OR UPDATE OR DELETE ON client_nongdpr
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO client_nongdpr@non_lowcost
+        VALUES (:NEW.client_id, :NEW.premium, :NEW.data_inregistrare);
+    ELSIF DELETING THEN 
+        DELETE FROM client_nongdpr@non_lowcost
+        WHERE client_id = :OLD.client_id;
+    ELSE
+        UPDATE client_nongdpr@non_lowcost
+        SET premium = :NEW.premium, data_inregistrare = :NEW.data_inregistrare
+        WHERE client_id = :OLD.client_id;
+    END IF;
+END;
+/
+
+-- verificare inserare
+INSERT INTO client_nongdpr
+VALUES (10001, 0, sysdate);
+
+SELECT * FROM client_nongdpr ORDER BY 1 DESC;
+COMMIT;
+
+-- verificare update
+UPDATE client_nongdpr
+SET premium = 1
+WHERE client_id = 10001;
+
+SELECT * FROM client_nongdpr ORDER BY 1 DESC;
+COMMIT;
+
+-- verificare stergere
+DELETE FROM client_nongdpr
+WHERE  client_id = 10001;
+
+SELECT * FROM client_nongdpr ORDER BY 1 DESC;
+COMMIT;
