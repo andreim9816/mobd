@@ -417,7 +417,12 @@ FROM mlog$_aeronava@lowcost;
 
 EXECUTE DBMS_MVIEW.REFRESH(UPPER('aeronava'), 'F');
 
+--- replicare destinatie
+INSERT INTO destinatie
+SELECT * FROM destinatie@centralizat;
 
+SELECT * FROM destinatie
+ORDER BY 1;
 -- II.4) Furnizarea formelor de transparenta pentru intreg modelul ales
 -- Pentru fiecare tabela (care se afla in aceeasi baza de date sau nu) se creeaza un sinonim corespunzator, respectiv o vizualizare
 -- care cuprinde datele agregate din cele 2 fragmentari orizontale

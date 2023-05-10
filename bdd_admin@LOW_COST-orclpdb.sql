@@ -726,6 +726,54 @@ WHERE aeronava_id = '0000';
 
 COMMIT;
 
+--- replicare destinatie
+INSERT INTO destinatie
+SELECT * FROM centralizat_admin.destinatie;
+
+SELECT * FROM destinatie;
+
+CREATE OR REPLACE TRIGGER t_rep_destinatie
+AFTER INSERT OR UPDATE OR DELETE ON destinatie
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO destinatie@non_lowcost
+        VALUES (:NEW.destinatie_id, :NEW.oras, :NEW.stat_id);
+    ELSIF DELETING THEN 
+        DELETE FROM destinatie@non_lowcost
+        WHERE destinatie_id = :OLD.destinatie_id;
+    ELSE
+        UPDATE destinatie@non_lowcost
+        SET oras = :NEW.oras, stat_id = :NEW.stat_id
+        WHERE destinatie_id = :OLD.destinatie_id;
+    END IF;
+END;
+/
+
+-- verificare insert
+INSERT INTO destinatie
+VALUES ('ABC', 'Allinghton', 'SD');
+
+SELECT * FROM destinatie
+ORDER BY 1;
+
+COMMIT;
+
+-- verificare update
+UPDATE destinatie
+SET oras = 'Allinghton Town'
+WHERE destinatie_id = 'ABC';
+
+SELECT * FROM destinatie
+ORDER BY 1;
+
+COMMIT;
+
+-- verificare delete
+DELETE FROM destinatie
+WHERE destinatie_id = 'ABC';
+
+COMMIT;
 
 -- II.4) Furnizarea formelor de transparenta pentru intreg modelul ales
 -- Pentru fiecare tabela (care se afla in aceeasi baza de date sau nu) se creeaza un sinonim corespunzator, respectiv o vizualizare
