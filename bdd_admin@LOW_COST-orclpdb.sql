@@ -687,3 +687,47 @@ WHERE  client_id = 10001;
 
 SELECT * FROM client_nongdpr ORDER BY 1 DESC;
 COMMIT;
+
+-- II.4) Furnizarea formelor de transparenta pentru intreg modelul ales
+-- Pentru fiecare tabela (care se afla in aceeasi baza de date sau nu) se creeaza un sinonim corespunzator, respectiv o vizualizare
+-- care cuprinde datele agregate din cele 2 fragmentari orizontale
+
+-- Operator Zbor
+CREATE OR REPLACE SYNONYM operator_zbor_nonlowcost
+FOR bdd_admin.operator_zbor_nonlowcost@non_lowcost;
+
+-- Zbor
+CREATE OR REPLACE SYNONYM zbor_nonlowcost
+FOR bdd_admin.zbor_nonlowcost@non_lowcost;
+
+-- Rezervare
+CREATE OR REPLACE SYNONYM rezervare_nonlowcost
+FOR bdd_admin.rezervare_nonlowcost@non_lowcost;
+
+-- Plata
+CREATE OR REPLACE SYNONYM plata_nonlowcost
+FOR bdd_admin.plata_nonlowcost@non_lowcost;
+
+-- Metoda Plata
+CREATE OR REPLACE SYNONYM metoda_plata_nonlowcost
+FOR bdd_admin.metoda_plata_nonlowcost@non_lowcost;
+
+-- Clasa Zbor
+CREATE OR REPLACE SYNONYM clasa_zbor_nonlowcost
+FOR bdd_admin.clasa_zbor_nonlowcost@non_lowcost;
+
+-- Aeronava
+CREATE OR REPLACE SYNONYM aeronava_nonlowcost
+FOR bdd_admin.aeronava_nonlowcost@non_lowcost;
+
+-- Destinatie
+CREATE OR REPLACE SYNONYM destinatie_nonlowcost
+FOR bdd_admin.destinatie_nonlowcost@non_lowcost;
+
+-- Stat
+CREATE OR REPLACE SYNONYM stat_nonlowcost
+FOR bdd_admin.stat_nonlowcost@non_lowcost;
+
+-- Client
+CREATE OR REPLACE SYNONYM client_nongdpr_nonlowcost
+FOR bdd_admin.client_nongdpr_nonlowcost@non_lowcost;

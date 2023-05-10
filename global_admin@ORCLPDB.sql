@@ -206,8 +206,246 @@ SELECT * FROM client_nongdpr_nonlowcost;
 
 CREATE OR REPLACE VIEW client
 AS
-SELECT ngdpr.*, gdpr.nume, gdpr.prenume, gdpr.email, gdpr.numar_telefon
+SELECT ngdpr.client_id, ngdpr.premium, ngdpr.data_inregistrare, gdpr.nume, gdpr.prenume, gdpr.email, gdpr.numar_telefon
 FROM client_nongdpr ngdpr 
 JOIN client_gdpr gdpr on ngdpr.client_id = gdpr.client_id;
 
 SELECT * FROM client;
+
+-- Triggeri pentru actualizarea datelor
+
+CREATE OR REPLACE TRIGGER t_operator_zbor
+INSTEAD OF INSERT OR DELETE ON operator_zbor
+FOR EACH ROW
+BEGIN
+ IF INSERTING THEN
+     IF :new.tip = 'Non low cost' THEN
+        INSERT INTO operator_zbor_nonlowcost (OPERATOR_ID, NUME, TIP) 
+        VALUES (:new.operator_id, :new.nume, :new.tip);
+     ELSE
+        INSERT INTO operator_zbor_lowcost (OPERATOR_ID, NUME, TIP) 
+        VALUES (:new.operator_id, :new.nume, :new.tip);
+    END IF;
+ END IF;    
+ 
+ IF DELETING THEN
+     IF :new.tip = 'Non low cost' THEN
+        DELETE FROM operator_zbor_nonlowcost 
+        WHERE operator_id = :old.operator_id;
+     ELSE     
+        DELETE FROM operator_zbor_lowcost 
+        WHERE operator_id = :old.operator_id;
+     END IF;
+ END IF;     
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_zbor
+INSTEAD OF INSERT OR DELETE ON zbor
+FOR EACH ROW
+DECLARE
+    tip VARCHAR2(15);
+BEGIN
+    SELECT oz.tip INTO tip
+    FROM operator_zbor oz
+    WHERE oz.operator_id = :new.operator_id;
+    
+    IF INSERTING THEN
+        IF tip = 'Non low cost' THEN
+            INSERT INTO zbor_nonlowcost (OPERATOR_ID, AERONAVA_ID, LOCATIE_PLECARE_ID, LOCATIE_SOSIRE_ID, DATA_PLECARE, DURATA, DISTANTA, DATA_SOSIRE, ANULAT, ZBOR_ID, TOTAL_LOCURI) 
+            VALUES (:new.OPERATOR_ID, :new.AERONAVA_ID, :new.LOCATIE_PLECARE_ID, :new.LOCATIE_SOSIRE_ID, :new.DATA_PLECARE,:new.DURATA,:new.DISTANTA,:new.DATA_SOSIRE,:new.ANULAT,:new.ZBOR_ID,:new.TOTAL_LOCURI);
+        ELSE
+            INSERT INTO zbor_lowcost (OPERATOR_ID, AERONAVA_ID, LOCATIE_PLECARE_ID, LOCATIE_SOSIRE_ID, DATA_PLECARE, DURATA, DISTANTA, DATA_SOSIRE, ANULAT, ZBOR_ID, TOTAL_LOCURI) 
+            VALUES (:new.OPERATOR_ID, :new.AERONAVA_ID, :new.LOCATIE_PLECARE_ID, :new.LOCATIE_SOSIRE_ID, :new.DATA_PLECARE,:new.DURATA,:new.DISTANTA,:new.DATA_SOSIRE,:new.ANULAT,:new.ZBOR_ID,:new.TOTAL_LOCURI);
+        END IF;
+    END IF;
+    
+    IF DELETING THEN
+        IF tip = 'Non low cost' THEN
+            DELETE FROM zbor_nonlowcost WHERE zbor_id = :old.zbor_id;
+        ELSE
+            DELETE FROM zbor_lowcost WHERE zbor_id = :old.zbor_id;
+        END IF;            
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_rezervare
+INSTEAD OF INSERT OR DELETE ON rezervare
+FOR EACH ROW
+DECLARE
+    tip VARCHAR2(15);
+BEGIN
+    SELECT oz.tip INTO tip
+    FROM operator_zbor oz
+    JOIN zbor z on oz.operator_id = z.operator_id
+    WHERE :new.zbor_id = z.zbor_id;
+
+    IF INSERTING THEN
+     IF tip = 'Non low cost' THEN
+        INSERT INTO rezervare_nonlowcost (REZERVARE_ID, NR_PASAGERI, NR_PASAGERI_FEMEI, NR_PASAGERI_BARBATI, DATA_REZERVARE, CLIENT_ID, ZBOR_ID, CLASA_ZBOR_ID, PLATA_ID) 
+        VALUES (:new.REZERVARE_ID, :new.NR_PASAGERI, :new.NR_PASAGERI_FEMEI, :new.NR_PASAGERI_BARBATI, :new.DATA_REZERVARE,:new.CLIENT_ID,:new.ZBOR_ID,:new.CLASA_ZBOR_ID,:new.PLATA_ID);
+     ELSE
+        INSERT INTO rezervare_lowcost (REZERVARE_ID, NR_PASAGERI, NR_PASAGERI_FEMEI, NR_PASAGERI_BARBATI, DATA_REZERVARE, CLIENT_ID, ZBOR_ID, CLASA_ZBOR_ID, PLATA_ID) 
+        VALUES (:new.REZERVARE_ID, :new.NR_PASAGERI, :new.NR_PASAGERI_FEMEI, :new.NR_PASAGERI_BARBATI, :new.DATA_REZERVARE,:new.CLIENT_ID,:new.ZBOR_ID,:new.CLASA_ZBOR_ID,:new.PLATA_ID);
+     END IF;    
+    END IF;
+    
+    IF DELETING THEN
+     IF tip = 'Non low cost' THEN
+        DELETE FROM rezervare_nonlowcost WHERE rezervare_id = :old.rezervare_id;
+     ELSE 
+        DELETE FROM rezervare_lowcost WHERE rezervare_id = :old.rezervare_id;
+     END IF;        
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_plata
+INSTEAD OF INSERT OR DELETE ON plata
+FOR EACH ROW
+DECLARE
+    tip VARCHAR2(15);
+BEGIN
+    SELECT oz.tip INTO tip
+    FROM operator_zbor oz
+    JOIN zbor z on oz.operator_id = z.operator_id
+    JOIN rezervare r on r.zbor_id = z.zbor_id
+    WHERE :new.plata_id = r.plata_id;
+
+    IF INSERTING THEN
+        IF tip = 'Non low cost' THEN
+            INSERT INTO plata_nonlowcost (PLATA_ID, METODA_PLATA_ID, SUMA_TOTALA, DATA_PLATA) 
+            VALUES (:new.PLATA_ID, :new.METODA_PLATA_ID, :new.SUMA_TOTALA, :new.DATA_PLATA);
+        ELSE
+            INSERT INTO plata_lowcost (PLATA_ID, METODA_PLATA_ID, SUMA_TOTALA, DATA_PLATA) 
+            VALUES (:new.PLATA_ID, :new.METODA_PLATA_ID, :new.SUMA_TOTALA, :new.DATA_PLATA);
+        END IF;
+    END IF;
+    
+    IF DELETING THEN
+        IF tip = 'Non low cost' THEN
+            DELETE FROM plata_nonlowcost WHERE plata_id = :old.plata_id;
+        ELSE 
+            DELETE FROM plata_lowcost WHERE plata_id = :old.plata_id;
+        END IF;    
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_client_nongdpr
+INSTEAD OF INSERT OR DELETE ON client_nongdpr
+FOR EACH ROW
+DECLARE
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO client_nongdpr_lowcost (CLIENT_ID, PREMIUM, DATA_INREGISTRARE)
+        VALUES(:new.CLIENT_ID, :new.PREMIUM, :new.DATA_INREGISTRARE);
+    END IF;
+    
+    IF DELETING THEN
+        DELETE FROM client_nongdpr_lowcost WHERE client_id = :old.client_id;
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_client
+INSTEAD OF INSERT OR DELETE ON client
+FOR EACH ROW
+DECLARE
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO client_nongdpr (CLIENT_ID, PREMIUM, DATA_INREGISTRARE)
+        VALUES(:new.CLIENT_ID, :new.PREMIUM, :new.DATA_INREGISTRARE);
+        
+        INSERT INTO client_gdpr (CLIENT_ID, NUME, PRENUME, EMAIL, NUMAR_TELEFON)
+        VALUES(:new.CLIENT_ID, :new.NUME, :new.PRENUME, :new.EMAIL, :new.NUMAR_TELEFON);
+    END IF;
+    
+    IF DELETING THEN
+        DELETE FROM client_nongdpr WHERE client_id = :old.client_id;
+        DELETE FROM client_gdpr WHERE client_id = :old.client_id;
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_metoda_plata
+INSTEAD OF INSERT OR DELETE ON metoda_plata
+FOR EACH ROW
+DECLARE
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO metoda_plata_lowcost (METODA_PLATA_ID, DENUMIRE)
+        VALUES(:new.METODA_PLATA_ID, :new.DENUMIRE);
+    END IF;
+    
+    IF DELETING THEN
+        DELETE FROM metoda_plata_lowcost WHERE metoda_plata_id = :old.metoda_plata_id;
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_clasa_zbor
+INSTEAD OF INSERT OR DELETE ON clasa_zbor
+FOR EACH ROW
+DECLARE
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO clasa_zbor_lowcost(CLASA_ZBOR_ID, DENUMIRE)
+        VALUES(:new.CLASA_ZBOR_ID, :new.DENUMIRE);
+    END IF;
+    
+    IF DELETING THEN
+        DELETE FROM clasa_zbor_lowcost WHERE clasa_zbor_id = :new.clasa_zbor_id;
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_aeronava
+INSTEAD OF INSERT OR UPDATE ON aeronava
+FOR EACH ROW
+DECLARE
+BEGIN
+    IF INSERTING THEN     
+        INSERT INTO aeronava_lowcost (PRODUCATOR, NUME, AERONAVA_ID) 
+        VALUES(:new.PRODUCATOR, :new.NUME, :new.AERONAVA_ID);
+    END IF;
+    
+    IF DELETING THEN
+        DELETE FROM aeronava_lowcost 
+        WHERE aeronava_id = :old.aeronava_id;
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_destinatie
+INSTEAD OF INSERT OR DELETE ON destinatie
+FOR EACH ROW
+DECLARE
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO destinatie_lowcost (DESTINATIE_ID, ORAS, STAT_ID) 
+        VALUES(:new.DESTINATIE_ID, :new.ORAS, :new.STAT_ID);
+    END IF;
+    
+    IF DELETING THEN
+        DELETE FROM destinatie_lowcost WHERE destinatie_id = :old.destinatie_id;
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_stat
+INSTEAD OF INSERT OR DELETE ON stat
+FOR EACH ROW
+DECLARE
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO stat_lowcost (STAT_ID, STAT) 
+        VALUES(:new.STAT_ID, :new.STAT);
+    END IF;
+    
+    IF DELETING THEN
+        DELETE FROM stat_lowcost WHERE stat_id = :old.stat_id;
+    END IF;
+END;
+/
