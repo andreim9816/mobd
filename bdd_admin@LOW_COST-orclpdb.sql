@@ -688,6 +688,45 @@ WHERE  client_id = 10001;
 SELECT * FROM client_nongdpr ORDER BY 1 DESC;
 COMMIT;
 
+-- inserare date aeronava
+INSERT INTO aeronava
+SELECT * FROM centralizat_admin.aeronava;
+
+SELECT * FROM aeronava;
+
+alter table aeronava
+add constraint pk_aeronava primary key (aeronava_id);
+
+CREATE MATERIALIZED VIEW
+LOG ON aeronava
+WITH PRIMARY KEY;
+
+-- verificare insert
+INSERT INTO aeronava
+VALUES ('0000', 'BOEING Bros', 'Boeing 181-294-142');
+
+SELECT * FROM aeronava
+ORDER BY 1;
+
+COMMIT;
+
+-- verificare update
+UPDATE aeronava
+SET producator = 'BOEING BROS'
+WHERE aeronava_id = '0000';
+
+SELECT * FROM aeronava
+ORDER BY 1;
+
+COMMIT;
+
+-- verificare delete
+DELETE FROM aeronava
+WHERE aeronava_id = '0000';
+
+COMMIT;
+
+
 -- II.4) Furnizarea formelor de transparenta pentru intreg modelul ales
 -- Pentru fiecare tabela (care se afla in aceeasi baza de date sau nu) se creeaza un sinonim corespunzator, respectiv o vizualizare
 -- care cuprinde datele agregate din cele 2 fragmentari orizontale

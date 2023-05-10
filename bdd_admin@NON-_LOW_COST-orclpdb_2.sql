@@ -400,6 +400,24 @@ SELECT * FROM stat;
 SELECT * FROM client_nongdpr 
 ORDER BY 1 DESC;
 
+-- aeronava: cream o vizualizare materializata
+CREATE MATERIALIZED VIEW aeronava
+REFRESH FAST
+START WITH SYSDATE
+NEXT SYSDATE + 1
+WITH PRIMARY KEY
+AS SELECT * FROM aeronava@lowcost;
+
+-- verificare insert, update
+SELECT * FROM aeronava
+ORDER BY 1;
+
+SELECT * 
+FROM mlog$_aeronava@lowcost;
+
+EXECUTE DBMS_MVIEW.REFRESH(UPPER('aeronava'), 'F');
+
+
 -- II.4) Furnizarea formelor de transparenta pentru intreg modelul ales
 -- Pentru fiecare tabela (care se afla in aceeasi baza de date sau nu) se creeaza un sinonim corespunzator, respectiv o vizualizare
 -- care cuprinde datele agregate din cele 2 fragmentari orizontale
