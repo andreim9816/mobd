@@ -76,12 +76,21 @@ BEGIN
         WHERE owner = UPPER(p_username)
     )
     LOOP
-    v_cmd := 'GRANT ALL ON '||r.owner||'.'||r.table_name||' TO ' || p_grantee;
-    EXECUTE IMMEDIATE v_cmd;
-    DBMS_OUTPUT.PUT_LINE(v_cmd);
+        v_cmd := 'GRANT ALL ON '||r.owner||'.'||r.table_name||' TO ' || p_grantee;
+        EXECUTE IMMEDIATE v_cmd;
+    END LOOP;
+    
+    FOR r IN (
+        SELECT sequence_owner, sequence_name
+        FROM all_sequences
+        where sequence_owner = UPPER(p_username)
+    ) LOOP
+        v_cmd := 'GRANT ALL ON '||r.sequence_owner||'.'||r.sequence_name||' TO ' || p_grantee;
+        EXECUTE IMMEDIATE v_cmd;
     END LOOP;
 END;
 /
+
 
 BEGIN
     grant_select('centralizat_admin','bdd_admin');

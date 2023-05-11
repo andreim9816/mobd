@@ -34,11 +34,6 @@ drop table clasa_zbor;
 drop table destinatie;
 
 -- crearea tabelelor
-CREATE TABLE AERONAVA(
-    aeronava_id varchar2(40),
-    producator VARCHAR2(60),
-    nume VARCHAR2(60)
-);
 
 CREATE TABLE STAT(
     stat_id VARCHAR2(3),
@@ -71,7 +66,8 @@ CREATE TABLE PLATA_NONLOWCOST
     (plata_id NUMBER(10),
     suma_totala NUMBER(7),
     data_plata TIMESTAMP,
-    metoda_plata_id NUMBER(2)
+    metoda_plata_id NUMBER(2),
+    rezervare_id NUMBER(10)
 );   
 
 CREATE TABLE CLIENT_NONGDPR (
@@ -102,8 +98,7 @@ CREATE TABLE REZERVARE_NONLOWCOST(
      data_rezervare TIMESTAMP,
      client_id NUMBER(8),
      zbor_id NUMBER(8),
-     clasa_zbor_id NUMBER(2),
-     plata_id NUMBER(10)
+     clasa_zbor_id NUMBER(2)
 );
 
 -- inserare date pe fragmente
@@ -141,7 +136,7 @@ INSERT INTO plata_nonlowcost
 SELECT p.*
 FROM plata@centralizat p
 JOIN rezervare_nonlowcost r
-ON (r.plata_id = p.plata_id);
+ON (r.rezervare_id = p.rezervare_id);
 
 SELECT * FROM plata_nonlowcost;
 
@@ -202,6 +197,9 @@ CREATE SEQUENCE sec_op_zbor_nonlowcost
     START WITH 16
     NOCYCLE;
 
+CREATE OR REPLACE SYNONYM seq_operator_zbor
+FOR sec_op_zbor_nonlowcost;
+
 insert into operator_zbor_nonlowcost
 values ( sec_op_zbor_nonlowcost.nextval, null, 'tip1');
 
@@ -242,6 +240,9 @@ CREATE SEQUENCE sec_zbor_nonlowcost
     INCREMENT BY 2
     START WITH 1048577
     NOCYCLE;
+
+CREATE OR REPLACE SYNONYM seq_zbor
+FOR sec_zbor_nonlowcost;
 
 --foreign key
 alter table zbor_nonlowcost
@@ -310,6 +311,9 @@ CREATE SEQUENCE sec_rezervare_nonlowcost
     START WITH 1040002
     NOCYCLE;
 
+CREATE OR REPLACE SYNONYM seq_rezervare
+FOR sec_rezervare_nonlowcost;
+
 --foreign key
 alter table rezervare_nonlowcost
     add constraint fk_rezervare_client_nonlowcost FOREIGN key
@@ -360,6 +364,9 @@ CREATE SEQUENCE sec_plata_nonlowcost
     INCREMENT BY 2
     START WITH 1040002
     NOCYCLE;
+
+CREATE OR REPLACE SYNONYM seq_plata
+FOR sec_plata_nonlowcost;
 
 --foreign key
 alter table plata_nonlowcost

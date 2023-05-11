@@ -241,7 +241,7 @@ BEGIN
  END IF;    
  
  IF DELETING THEN
-     IF :new.tip = 'Non low cost' THEN
+     IF :old.tip = 'Non low cost' THEN
         DELETE FROM operator_zbor_nonlowcost 
         WHERE operator_id = :old.operator_id;
      ELSE     
@@ -257,12 +257,12 @@ INSTEAD OF INSERT OR DELETE ON zbor
 FOR EACH ROW
 DECLARE
     tip VARCHAR2(15);
-BEGIN
-    SELECT oz.tip INTO tip
-    FROM operator_zbor oz
-    WHERE oz.operator_id = :new.operator_id;
-    
+BEGIN    
     IF INSERTING THEN
+        SELECT oz.tip INTO tip
+        FROM operator_zbor oz
+        WHERE oz.operator_id = :new.operator_id;
+        
         IF tip = 'Non low cost' THEN
             INSERT INTO zbor_nonlowcost (OPERATOR_ID, AERONAVA_ID, LOCATIE_PLECARE_ID, LOCATIE_SOSIRE_ID, DATA_PLECARE, DURATA, DISTANTA, DATA_SOSIRE, ANULAT, ZBOR_ID, TOTAL_LOCURI) 
             VALUES (:new.OPERATOR_ID, :new.AERONAVA_ID, :new.LOCATIE_PLECARE_ID, :new.LOCATIE_SOSIRE_ID, :new.DATA_PLECARE,:new.DURATA,:new.DISTANTA,:new.DATA_SOSIRE,:new.ANULAT,:new.ZBOR_ID,:new.TOTAL_LOCURI);
@@ -273,6 +273,10 @@ BEGIN
     END IF;
     
     IF DELETING THEN
+        SELECT oz.tip INTO tip
+        FROM operator_zbor oz
+        WHERE oz.operator_id = :old.operator_id;
+        
         IF tip = 'Non low cost' THEN
             DELETE FROM zbor_nonlowcost WHERE zbor_id = :old.zbor_id;
         ELSE
@@ -282,28 +286,43 @@ BEGIN
 END;
 /
 
+--select line, text from user_errors where name = 'REZERVARE' order by sequence;
+
+--insert into rezervare(REZERVARE_ID, NR_PASAGERI, NR_PASAGERI_FEMEI, NR_PASAGERI_BARBATI, DATA_REZERVARE, CLIENT_ID, ZBOR_ID, CLASA_ZBOR_ID) 
+--values(bdd_admin.seq_rezervare.nextval,3,1,2,sysdate,1,1048575,1);
+--
+--select * from rezervare order by rezervare_id desc;
+
 CREATE OR REPLACE TRIGGER t_rezervare
 INSTEAD OF INSERT OR DELETE ON rezervare
 FOR EACH ROW
 DECLARE
     tip VARCHAR2(15);
 BEGIN
+
+IF INSERTING THEN   
+
     SELECT oz.tip INTO tip
     FROM operator_zbor oz
     JOIN zbor z on oz.operator_id = z.operator_id
     WHERE :new.zbor_id = z.zbor_id;
 
-    IF INSERTING THEN
-     IF tip = 'Non low cost' THEN
-        INSERT INTO rezervare_nonlowcost (REZERVARE_ID, NR_PASAGERI, NR_PASAGERI_FEMEI, NR_PASAGERI_BARBATI, DATA_REZERVARE, CLIENT_ID, ZBOR_ID, CLASA_ZBOR_ID, PLATA_ID) 
-        VALUES (:new.REZERVARE_ID, :new.NR_PASAGERI, :new.NR_PASAGERI_FEMEI, :new.NR_PASAGERI_BARBATI, :new.DATA_REZERVARE,:new.CLIENT_ID,:new.ZBOR_ID,:new.CLASA_ZBOR_ID,:new.PLATA_ID);
+    IF tip = 'Non low cost' THEN  
+        INSERT INTO rezervare_nonlowcost (REZERVARE_ID, NR_PASAGERI, NR_PASAGERI_FEMEI, NR_PASAGERI_BARBATI, DATA_REZERVARE, CLIENT_ID, ZBOR_ID, CLASA_ZBOR_ID) 
+        VALUES (seq_rezervare.nextval@non_lowcost, :new.NR_PASAGERI, :new.NR_PASAGERI_FEMEI, :new.NR_PASAGERI_BARBATI, :new.DATA_REZERVARE,:new.CLIENT_ID,:new.ZBOR_ID,:new.CLASA_ZBOR_ID);
      ELSE
-        INSERT INTO rezervare_lowcost (REZERVARE_ID, NR_PASAGERI, NR_PASAGERI_FEMEI, NR_PASAGERI_BARBATI, DATA_REZERVARE, CLIENT_ID, ZBOR_ID, CLASA_ZBOR_ID, PLATA_ID) 
-        VALUES (:new.REZERVARE_ID, :new.NR_PASAGERI, :new.NR_PASAGERI_FEMEI, :new.NR_PASAGERI_BARBATI, :new.DATA_REZERVARE,:new.CLIENT_ID,:new.ZBOR_ID,:new.CLASA_ZBOR_ID,:new.PLATA_ID);
+        INSERT INTO rezervare_lowcost (REZERVARE_ID, NR_PASAGERI, NR_PASAGERI_FEMEI, NR_PASAGERI_BARBATI, DATA_REZERVARE, CLIENT_ID, ZBOR_ID, CLASA_ZBOR_ID) 
+        VALUES (bdd_admin.seq_rezervare.nextval, :new.NR_PASAGERI, :new.NR_PASAGERI_FEMEI, :new.NR_PASAGERI_BARBATI, :new.DATA_REZERVARE,:new.CLIENT_ID,:new.ZBOR_ID,:new.CLASA_ZBOR_ID);
      END IF;    
     END IF;
     
     IF DELETING THEN
+    
+        SELECT oz.tip INTO tip
+        FROM operator_zbor oz
+        JOIN zbor z on oz.operator_id = z.operator_id
+        WHERE :old.zbor_id = z.zbor_id;
+    
      IF tip = 'Non low cost' THEN
         DELETE FROM rezervare_nonlowcost WHERE rezervare_id = :old.rezervare_id;
      ELSE 
@@ -312,6 +331,11 @@ BEGIN
     END IF;
 END;
 /
+--create or replace synonym seq_plata
+-- for bdd_admin.seq_plata;
+
+--create or replace synonym seq_rezervare
+--for bdd_admin.seq_plata;
 
 CREATE OR REPLACE TRIGGER t_plata
 INSTEAD OF INSERT OR DELETE ON plata
@@ -319,23 +343,31 @@ FOR EACH ROW
 DECLARE
     tip VARCHAR2(15);
 BEGIN
-    SELECT oz.tip INTO tip
-    FROM operator_zbor oz
-    JOIN zbor z on oz.operator_id = z.operator_id
-    JOIN rezervare r on r.zbor_id = z.zbor_id
-    WHERE :new.plata_id = r.plata_id;
-
     IF INSERTING THEN
+    
+        SELECT oz.tip INTO tip
+        FROM operator_zbor oz
+        JOIN zbor z on oz.operator_id = z.operator_id
+        JOIN rezervare r on r.zbor_id = z.zbor_id
+        WHERE :new.rezervare_id = r.rezervare_id;
+    
         IF tip = 'Non low cost' THEN
-            INSERT INTO plata_nonlowcost (PLATA_ID, METODA_PLATA_ID, SUMA_TOTALA, DATA_PLATA) 
-            VALUES (:new.PLATA_ID, :new.METODA_PLATA_ID, :new.SUMA_TOTALA, :new.DATA_PLATA);
+            INSERT INTO plata_nonlowcost (PLATA_ID, METODA_PLATA_ID, SUMA_TOTALA, DATA_PLATA, REZERVARE_ID) 
+            VALUES (sec_plata_nonlowcost.nextval@non_lowcost, :new.METODA_PLATA_ID, :new.SUMA_TOTALA, :new.DATA_PLATA, :new.REZERVARE_ID);
         ELSE
-            INSERT INTO plata_lowcost (PLATA_ID, METODA_PLATA_ID, SUMA_TOTALA, DATA_PLATA) 
-            VALUES (:new.PLATA_ID, :new.METODA_PLATA_ID, :new.SUMA_TOTALA, :new.DATA_PLATA);
+            INSERT INTO plata_lowcost (PLATA_ID, METODA_PLATA_ID, SUMA_TOTALA, DATA_PLATA, REZERVARE_ID) 
+            VALUES (bdd_admin.sec_plata_lowcost.nextval, :new.METODA_PLATA_ID, :new.SUMA_TOTALA, :new.DATA_PLATA, :new.REZERVARE_ID);
         END IF;
     END IF;
     
     IF DELETING THEN
+    
+        SELECT oz.tip INTO tip
+        FROM operator_zbor oz
+        JOIN zbor z on oz.operator_id = z.operator_id
+        JOIN rezervare r on r.zbor_id = z.zbor_id
+        WHERE :old.rezervare_id = r.rezervare_id;
+        
         IF tip = 'Non low cost' THEN
             DELETE FROM plata_nonlowcost WHERE plata_id = :old.plata_id;
         ELSE 

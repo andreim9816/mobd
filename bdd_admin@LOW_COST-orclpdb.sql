@@ -75,7 +75,8 @@ CREATE TABLE PLATA_LOWCOST
     (plata_id NUMBER(10),
     suma_totala NUMBER(7),
     data_plata TIMESTAMP,
-    metoda_plata_id NUMBER(2)
+    metoda_plata_id NUMBER(2),
+    rezervare_id NUMBER(10)
 );   
 
 CREATE TABLE CLIENT_NONGDPR(
@@ -106,8 +107,7 @@ CREATE TABLE REZERVARE_LOWCOST(
      data_rezervare TIMESTAMP,
      client_id NUMBER(8),
      zbor_id NUMBER(8),
-     clasa_zbor_id NUMBER(2),
-     plata_id NUMBER(10)
+     clasa_zbor_id NUMBER(2)
 );
 
 -- inserare date pe fragmente
@@ -234,7 +234,7 @@ INSERT INTO plata_lowcost
 SELECT p.*
 FROM centralizat_admin.plata p
 JOIN rezervare_lowcost r
-ON (r.plata_id = p.plata_id);
+ON (r.rezervare_id = p.rezervare_id);
 
 SELECT * FROM plata_lowcost;
 
@@ -317,11 +317,13 @@ values ( sec_op_zbor_lowcost.nextval, 'Spirit Air Lines', 'tip1');
 insert into operator_zbor_lowcost
 values ( sec_op_zbor_lowcost.nextval, 'United Air Lines Inc.', 'tip1');
 
-
 CREATE SEQUENCE sec_op_zbor_lowcost
     INCREMENT BY 2
     START WITH 15
     NOCYCLE;
+
+CREATE OR REPLACE SYNONYM seq_zbor
+FOR sec_op_zbor_lowcost;
 
 insert into operator_zbor_lowcost
 values ( sec_op_zbor_lowcost.nextval, null, 'tip1');
@@ -363,6 +365,9 @@ CREATE SEQUENCE sec_zbor_lowcost
     INCREMENT BY 2
     START WITH 1048576
     NOCYCLE;
+
+CREATE OR REPLACE SYNONYM seq_zbor
+FOR sec_zbor_lowcost;
 
 --foreign key
 alter table zbor_lowcost
@@ -431,6 +436,9 @@ CREATE SEQUENCE sec_rezervare_lowcost
     START WITH 1040001
     NOCYCLE;
 
+CREATE OR REPLACE SYNONYM seq_rezervare
+FOR sec_rezervare_lowcost;
+
 --foreign key
 alter table rezervare_lowcost
     add constraint fk_rezervare_client_lowcost FOREIGN key
@@ -480,10 +488,15 @@ ALTER TABLE plata_lowcost
 alter table plata_lowcost
     add constraint pk_plata_lowcost primary key (plata_id);
 
+--select bdd_admin.sec_plata_lowcost.nextval from dual;
+
 CREATE SEQUENCE sec_plata_lowcost
     INCREMENT BY 2
     START WITH 1040001
     NOCYCLE;
+
+CREATE OR REPLACE SYNONYM seq_plata
+FOR sec_plata_lowcost;
 
 --foreign key
 alter table plata_lowcost

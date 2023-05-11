@@ -68,7 +68,8 @@ CREATE TABLE PLATA
     (plata_id NUMBER(10) PRIMARY KEY,
     suma_totala NUMBER(7) NOT NULL,
     data_plata TIMESTAMP NOT NULL,
-    metoda_plata_id NUMBER(2) REFERENCES METODA_PLATA(metoda_plata_id)
+    metoda_plata_id NUMBER(2) REFERENCES METODA_PLATA(metoda_plata_id),
+    rezervare_id NUMBER(10) REFERENCES rezervare(rezervare_id)
 );   
 
 CREATE TABLE CLIENT
@@ -106,6 +107,5 @@ CREATE TABLE REZERVARE(
      data_rezervare TIMESTAMP NOT NULL,
      client_id NUMBER(8) REFERENCES CLIENT(client_id) ON DELETE CASCADE,
      zbor_id NUMBER(8) REFERENCES ZBOR(zbor_id) ON DELETE CASCADE,
-     clasa_zbor_id NUMBER(2) REFERENCES CLASA_ZBOR(clasa_zbor_id) ON DELETE CASCADE,
-     plata_id NUMBER(10) REFERENCES plata(plata_id) ON DELETE CASCADE
+     clasa_zbor_id NUMBER(2) REFERENCES CLASA_ZBOR(clasa_zbor_id) ON DELETE CASCADE
 );
