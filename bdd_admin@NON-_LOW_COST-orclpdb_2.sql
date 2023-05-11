@@ -330,22 +330,17 @@ alter table rezervare_nonlowcost
         (clasa_zbor_id) REFERENCES clasa_zbor(clasa_zbor_id)
         ON DELETE CASCADE;
 
-alter table rezervare_nonlowcost
-    add constraint fk_rezervare_plata_nonlowcost FOREIGN key
-        (plata_id) REFERENCES plata_nonlowcost(plata_id)
-        ON DELETE CASCADE;
+insert into rezervare_nonlowcost
+values ( sec_rezervare_nonlowcost.nextval, 5, 2, 3, CURRENT_TIMESTAMP, 1,1,1);
 
 insert into rezervare_nonlowcost
-values ( sec_rezervare_nonlowcost.nextval, 5, 2, 3, CURRENT_TIMESTAMP, 1,1,1,1);
+values ( sec_rezervare_nonlowcost.nextval, null, 2, 3, CURRENT_TIMESTAMP, 1,1,1);
 
 insert into rezervare_nonlowcost
-values ( sec_rezervare_nonlowcost.nextval, null, 2, 3, CURRENT_TIMESTAMP, 1,1,1,1);
+values ( sec_rezervare_nonlowcost.nextval, 0, 2, 3, CURRENT_TIMESTAMP, 1,1,1);
 
 insert into rezervare_nonlowcost
-values ( sec_rezervare_nonlowcost.nextval, 0, 2, 3, CURRENT_TIMESTAMP, 1,1,1,1);
-
-insert into rezervare_nonlowcost
-values ( sec_rezervare_nonlowcost.nextval, 5, 2, 3, null, 1,1,1,1);
+values ( sec_rezervare_nonlowcost.nextval, 5, 2, 3, null, 1,1,1);
 
 
 --constrangeri pentru fragmentul plata_nonlow_cost
@@ -374,14 +369,19 @@ alter table plata_nonlowcost
         (metoda_plata_id) REFERENCES METODA_PLATA(metoda_plata_id)
         ON DELETE CASCADE;
 
-insert into plata_nonlowcost
-values ( sec_plata_nonlowcost.nextval, 10, null, 1);
+alter table plata_nonlowcost
+    add constraint fk_rezervare_rezervare_nonlowcost FOREIGN key
+        (rezervarea_id) REFERENCES rezervare_nonlowcost(rezervare_id)
+        ON DELETE CASCADE;
 
 insert into plata_nonlowcost
-values ( sec_plata_nonlowcost.nextval, null, CURRENT_TIMESTAMP, null);
+values ( sec_plata_nonlowcost.nextval, 10, null, 1, 1);
 
 insert into plata_nonlowcost
-values ( sec_plata_nonlowcost.nextval, 100, CURRENT_TIMESTAMP, 1);
+values ( sec_plata_nonlowcost.nextval, null, CURRENT_TIMESTAMP, null, 1);
+
+insert into plata_nonlowcost
+values ( sec_plata_nonlowcost.nextval, 100, CURRENT_TIMESTAMP, 1, 1);
 
 --constrangeri pentru fragmentul client_nongdpr
 --not null
@@ -399,15 +399,6 @@ alter table client_nongdpr
 alter table client_nongdpr
     add constraint pk_client_nongdpr primary key (client_id);
 
-CREATE SEQUENCE sec_client_nongdpr
-    INCREMENT BY 1
-    START WITH 10003
-    NOCYCLE;
-
-INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 1, CURRENT_DATE);
-INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 5, CURRENT_DATE);
-INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 1, null);
-
 --- REPLICARE
 --- metoda plata
 ALTER TABLE metoda_plata
@@ -416,11 +407,6 @@ ALTER TABLE metoda_plata
 --primary key
 alter table metoda_plata
     add constraint pk_metoda_plata primary key (metoda_plata_id);
-
-CREATE SEQUENCE sec_metoda_plata
-    INCREMENT BY 1
-    START WITH 24
-    NOCYCLE;
 
 INSERT INTO metoda_plata
 SELECT * FROM metoda_plata@centralizat;
@@ -435,11 +421,6 @@ ALTER TABLE clasa_zbor
 alter table clasa_zbor
     add constraint pk_clasa_zbor primary key (clasa_zbor_id);
 
-CREATE SEQUENCE sec_clasa_zbor
-    INCREMENT BY 1
-    START WITH 24
-    NOCYCLE;
-
 INSERT INTO clasa_zbor
 SELECT * FROM clasa_zbor@centralizat;
 
@@ -452,11 +433,6 @@ ALTER TABLE stat
 --primary key
 alter table stat
     add constraint pk_stat primary key (stat_id);
-
-CREATE SEQUENCE sec_stat
-    INCREMENT BY 1
-    START WITH 55
-    NOCYCLE;
 
 INSERT INTO stat
 SELECT * FROM stat@centralizat;
@@ -477,11 +453,6 @@ ALTER TABLE aeronava
 --primary key
 alter table aeronava
     add constraint pk_aeronava primary key (aeronava_id);
-
-CREATE SEQUENCE sec_aeronava
-    INCREMENT BY 1
-    START WITH 147
-    NOCYCLE;
 
 CREATE MATERIALIZED VIEW aeronava
 REFRESH FAST
@@ -506,11 +477,6 @@ ALTER TABLE destinatie
 --primary key
 alter table destinatie
     add constraint pk_destinatie primary key (destinatie_id);
-
-CREATE SEQUENCE sec_destinatie
-    INCREMENT BY 1
-    START WITH 323
-    NOCYCLE;
 
 alter table destinatie
     add constraint fk_destinatie_stat FOREIGN key

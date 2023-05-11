@@ -455,22 +455,17 @@ alter table rezervare_lowcost
         (clasa_zbor_id) REFERENCES clasa_zbor(clasa_zbor_id)
         ON DELETE CASCADE;
 
-alter table rezervare_lowcost
-    add constraint fk_rezervare_plata_lowcost FOREIGN key
-        (plata_id) REFERENCES plata_lowcost(plata_id)
-        ON DELETE CASCADE;
+insert into rezervare_lowcost
+values ( sec_rezervare_lowcost.nextval, 5, 2, 3, CURRENT_TIMESTAMP, 1,1,1);
 
 insert into rezervare_lowcost
-values ( sec_rezervare_lowcost.nextval, 5, 2, 3, CURRENT_TIMESTAMP, 1,1,1,1);
+values ( sec_rezervare_lowcost.nextval, null, 2, 3, CURRENT_TIMESTAMP, 1,1,1);
 
 insert into rezervare_lowcost
-values ( sec_rezervare_lowcost.nextval, null, 2, 3, CURRENT_TIMESTAMP, 1,1,1,1);
+values ( sec_rezervare_lowcost.nextval, 0, 2, 3, CURRENT_TIMESTAMP, 1,1,1);
 
 insert into rezervare_lowcost
-values ( sec_rezervare_lowcost.nextval, 0, 2, 3, CURRENT_TIMESTAMP, 1,1,1,1);
-
-insert into rezervare_lowcost
-values ( sec_rezervare_lowcost.nextval, 5, 2, 3, null, 1,1,1,1);
+values ( sec_rezervare_lowcost.nextval, 5, 2, 3, null, 1,1,1);
 
 select count(*) from rezervare_lowcost;
 
@@ -504,14 +499,19 @@ alter table plata_lowcost
         (metoda_plata_id) REFERENCES METODA_PLATA(metoda_plata_id)
         ON DELETE CASCADE;
 
-insert into plata_lowcost
-values ( sec_plata_lowcost.nextval, 10, null, 1);
+alter table plata_lowcost
+    add constraint fk_rezervare_rezervare_lowcost FOREIGN key
+        (rezervarea_id) REFERENCES rezervare_lowcost(rezervare_id)
+        ON DELETE CASCADE;
 
 insert into plata_lowcost
-values ( sec_plata_lowcost.nextval, null, CURRENT_TIMESTAMP, null);
+values ( sec_plata_lowcost.nextval, 10, null, 1, 1);
 
 insert into plata_lowcost
-values ( sec_plata_lowcost.nextval, 100, CURRENT_TIMESTAMP, 1);
+values ( sec_plata_lowcost.nextval, null, CURRENT_TIMESTAMP, null, 1);
+
+insert into plata_lowcost
+values ( sec_plata_lowcost.nextval, 100, CURRENT_TIMESTAMP, 1, 1);
 
 --constrangeri pentru fragmentul client_nongdpr
 --not null
@@ -670,11 +670,6 @@ ALTER TABLE stat
 alter table stat
     add constraint pk_stat primary key (stat_id);
 
-CREATE SEQUENCE sec_stat
-    INCREMENT BY 1
-    START WITH 55
-    NOCYCLE;
-
 INSERT INTO stat
 SELECT * FROM centralizat_admin.stat;
 
@@ -700,7 +695,7 @@ END;
 
 -- verificare inserare
 INSERT INTO stat
-VALUES (sec_stat.nextval, 'New state');
+VALUES ('EK', 'New state');
 
 SELECT * FROM stat;
 COMMIT;
@@ -774,11 +769,6 @@ ALTER TABLE aeronava
 alter table aeronava
     add constraint pk_aeronava primary key (aeronava_id);
 
-CREATE SEQUENCE sec_aeronava
-    INCREMENT BY 1
-    START WITH 147
-    NOCYCLE;
-
 INSERT INTO aeronava
 SELECT * FROM centralizat_admin.aeronava;
 
@@ -793,7 +783,7 @@ WITH PRIMARY KEY;
 
 -- verificare insert
 INSERT INTO aeronava
-VALUES (sec_aeronava.nextval, 'BOEING Bros', 'Boeing 181-294-142');
+VALUES ('AAA-9', 'BOEING Bros', 'Boeing 181-294-142');
 
 SELECT * FROM aeronava
 ORDER BY 1;
@@ -824,11 +814,6 @@ ALTER TABLE destinatie
 alter table destinatie
     add constraint pk_destinatie primary key (destinatie_id);
 
-CREATE SEQUENCE sec_destinatie
-    INCREMENT BY 1
-    START WITH 323
-    NOCYCLE;
-
 alter table destinatie
     add constraint fk_destinatie_stat FOREIGN key
         (stat_id) REFERENCES stat(stat_id);
@@ -858,7 +843,7 @@ END;
 
 -- verificare insert
 INSERT INTO destinatie
-VALUES (sec_destinatie.nextval, 'Allinghton', 'SD');
+VALUES ('ZZZ', 'Allinghton', 'SD');
 
 SELECT * FROM destinatie
 ORDER BY 1;
