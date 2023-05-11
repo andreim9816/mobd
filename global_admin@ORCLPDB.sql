@@ -8,6 +8,13 @@ CREATE TABLE CLIENT_GDPR
      numar_telefon VARCHAR2(30) NOT NULL
 );
 
+CREATE DATABASE LINK non_lowcost
+CONNECT TO bdd_admin
+IDENTIFIED BY bdd_admin
+USING 'orclpdb_2';
+
+select * from tab@non_lowcost;
+
 --constrangeri pentru fragmentul client_gdpr
 --not null
 ALTER TABLE client_gdpr
@@ -32,12 +39,6 @@ INSERT INTO client_gdpr VALUES (10003, 'nume', null, 'email', '438943843');
 INSERT INTO client_gdpr VALUES (10004, 'nume', 'prenume', null, '438943843');
 INSERT INTO client_gdpr VALUES (10005, 'nume', 'prenume', 'email', null);
 
-CREATE DATABASE LINK non_lowcost
-CONNECT TO bdd_admin
-IDENTIFIED BY bdd_admin 
-USING 'orclpdb_2';
-
-select * from tab@non_lowcost;
 
 -- CREARE FRAGMENT VERTICAL GDPR
 INSERT INTO client_gdpr
@@ -76,7 +77,7 @@ FROM user_tab_columns
 WHERE table_name = UPPER('client_nongdpr')
 AND column_name <> 'CLIENT_ID';
 
--- II.3) Furnizarea formelor de transparenta pentru intreg modelul ales
+-- II.4) Furnizarea formelor de transparenta pentru intreg modelul ales
 -- Pentru fiecare tabela (care se afla in aceeasi baza de date sau nu) se creeaza un sinonim corespunzator, respectiv o vizualizare
 -- care cuprinde datele agregate din cele 2 fragmentari orizontale
 
@@ -224,6 +225,37 @@ JOIN client_gdpr gdpr on ngdpr.client_id = gdpr.client_id;
 
 SELECT * FROM client;
 
+-- Sinonime pentru secvente
+create or replace synonym seq_plata
+ for bdd_admin.seq_plata;
+
+create or replace synonym seq_plata_nonlowcost
+    for seq_plata@non_lowcost;
+
+create or replace synonym seq_rezervare
+    for bdd_admin.seq_plata;
+
+create or replace synonym seq_rezervare_nonlowcost
+    for seq_rezervare@non_lowcost;
+
+create or replace synonym seq_zbor
+for bdd_admin.seq_zbor;
+
+create or replace synonym seq_zbor_nonlowcost
+    for seq_zbor@non_lowcost;
+
+create or replace synonym seq_metoda_plata
+for bdd_admin.seq_metoda_plata;
+
+create or replace synonym seq_metoda_plata_nonlowcost
+    for seq_metoda_plata@non_lowcost;
+
+create or replace synonym seq_clasa_zbor
+for bdd_admin.seq_clasa_zbor;
+
+create or replace synonym seq_clasa_zbor_nonlowcost
+    for seq_clasa_zbor@non_lowcost;
+
 -- Triggeri pentru actualizarea datelor
 
 CREATE OR REPLACE TRIGGER t_operator_zbor
@@ -264,11 +296,11 @@ BEGIN
         WHERE oz.operator_id = :new.operator_id;
         
         IF tip = 'Non low cost' THEN
-            INSERT INTO zbor_nonlowcost (OPERATOR_ID, AERONAVA_ID, LOCATIE_PLECARE_ID, LOCATIE_SOSIRE_ID, DATA_PLECARE, DURATA, DISTANTA, DATA_SOSIRE, ANULAT, ZBOR_ID, TOTAL_LOCURI) 
-            VALUES (:new.OPERATOR_ID, :new.AERONAVA_ID, :new.LOCATIE_PLECARE_ID, :new.LOCATIE_SOSIRE_ID, :new.DATA_PLECARE,:new.DURATA,:new.DISTANTA,:new.DATA_SOSIRE,:new.ANULAT,:new.ZBOR_ID,:new.TOTAL_LOCURI);
+            INSERT INTO zbor_nonlowcost (ZBOR_ID, OPERATOR_ID, AERONAVA_ID, LOCATIE_PLECARE_ID, LOCATIE_SOSIRE_ID, DATA_PLECARE, DURATA, DISTANTA, DATA_SOSIRE, ANULAT, TOTAL_LOCURI) 
+            VALUES (seq_zbor_nonlowcost.nextval,:new.OPERATOR_ID, :new.AERONAVA_ID, :new.LOCATIE_PLECARE_ID, :new.LOCATIE_SOSIRE_ID, :new.DATA_PLECARE,:new.DURATA,:new.DISTANTA,:new.DATA_SOSIRE,:new.ANULAT,:new.TOTAL_LOCURI);
         ELSE
-            INSERT INTO zbor_lowcost (OPERATOR_ID, AERONAVA_ID, LOCATIE_PLECARE_ID, LOCATIE_SOSIRE_ID, DATA_PLECARE, DURATA, DISTANTA, DATA_SOSIRE, ANULAT, ZBOR_ID, TOTAL_LOCURI) 
-            VALUES (:new.OPERATOR_ID, :new.AERONAVA_ID, :new.LOCATIE_PLECARE_ID, :new.LOCATIE_SOSIRE_ID, :new.DATA_PLECARE,:new.DURATA,:new.DISTANTA,:new.DATA_SOSIRE,:new.ANULAT,:new.ZBOR_ID,:new.TOTAL_LOCURI);
+            INSERT INTO zbor_lowcost (ZBOR_ID, OPERATOR_ID, AERONAVA_ID, LOCATIE_PLECARE_ID, LOCATIE_SOSIRE_ID, DATA_PLECARE, DURATA, DISTANTA, DATA_SOSIRE, ANULAT, TOTAL_LOCURI) 
+            VALUES (seq_zbor_lowcost.nextval, :new.OPERATOR_ID, :new.AERONAVA_ID, :new.LOCATIE_PLECARE_ID, :new.LOCATIE_SOSIRE_ID, :new.DATA_PLECARE,:new.DURATA,:new.DISTANTA,:new.DATA_SOSIRE,:new.ANULAT,:new.TOTAL_LOCURI);
         END IF;
     END IF;
     
@@ -286,13 +318,6 @@ BEGIN
 END;
 /
 
---select line, text from user_errors where name = 'REZERVARE' order by sequence;
-
---insert into rezervare(REZERVARE_ID, NR_PASAGERI, NR_PASAGERI_FEMEI, NR_PASAGERI_BARBATI, DATA_REZERVARE, CLIENT_ID, ZBOR_ID, CLASA_ZBOR_ID) 
---values(bdd_admin.seq_rezervare.nextval,3,1,2,sysdate,1,1048575,1);
---
---select * from rezervare order by rezervare_id desc;
-
 CREATE OR REPLACE TRIGGER t_rezervare
 INSTEAD OF INSERT OR DELETE ON rezervare
 FOR EACH ROW
@@ -309,10 +334,10 @@ IF INSERTING THEN
 
     IF tip = 'Non low cost' THEN  
         INSERT INTO rezervare_nonlowcost (REZERVARE_ID, NR_PASAGERI, NR_PASAGERI_FEMEI, NR_PASAGERI_BARBATI, DATA_REZERVARE, CLIENT_ID, ZBOR_ID, CLASA_ZBOR_ID) 
-        VALUES (seq_rezervare.nextval@non_lowcost, :new.NR_PASAGERI, :new.NR_PASAGERI_FEMEI, :new.NR_PASAGERI_BARBATI, :new.DATA_REZERVARE,:new.CLIENT_ID,:new.ZBOR_ID,:new.CLASA_ZBOR_ID);
+        VALUES (seq_rezervare_nonlowcost.nextval, :new.NR_PASAGERI, :new.NR_PASAGERI_FEMEI, :new.NR_PASAGERI_BARBATI, :new.DATA_REZERVARE,:new.CLIENT_ID,:new.ZBOR_ID,:new.CLASA_ZBOR_ID);
      ELSE
         INSERT INTO rezervare_lowcost (REZERVARE_ID, NR_PASAGERI, NR_PASAGERI_FEMEI, NR_PASAGERI_BARBATI, DATA_REZERVARE, CLIENT_ID, ZBOR_ID, CLASA_ZBOR_ID) 
-        VALUES (bdd_admin.seq_rezervare.nextval, :new.NR_PASAGERI, :new.NR_PASAGERI_FEMEI, :new.NR_PASAGERI_BARBATI, :new.DATA_REZERVARE,:new.CLIENT_ID,:new.ZBOR_ID,:new.CLASA_ZBOR_ID);
+        VALUES (seq_rezervare_lowcost.nextval, :new.NR_PASAGERI, :new.NR_PASAGERI_FEMEI, :new.NR_PASAGERI_BARBATI, :new.DATA_REZERVARE,:new.CLIENT_ID,:new.ZBOR_ID,:new.CLASA_ZBOR_ID);
      END IF;    
     END IF;
     
@@ -331,11 +356,6 @@ IF INSERTING THEN
     END IF;
 END;
 /
---create or replace synonym seq_plata
--- for bdd_admin.seq_plata;
-
---create or replace synonym seq_rezervare
---for bdd_admin.seq_plata;
 
 CREATE OR REPLACE TRIGGER t_plata
 INSTEAD OF INSERT OR DELETE ON plata
@@ -353,10 +373,10 @@ BEGIN
     
         IF tip = 'Non low cost' THEN
             INSERT INTO plata_nonlowcost (PLATA_ID, METODA_PLATA_ID, SUMA_TOTALA, DATA_PLATA, REZERVARE_ID) 
-            VALUES (sec_plata_nonlowcost.nextval@non_lowcost, :new.METODA_PLATA_ID, :new.SUMA_TOTALA, :new.DATA_PLATA, :new.REZERVARE_ID);
+            VALUES (seq_plata_nonlowcost.nextval, :new.METODA_PLATA_ID, :new.SUMA_TOTALA, :new.DATA_PLATA, :new.REZERVARE_ID);
         ELSE
             INSERT INTO plata_lowcost (PLATA_ID, METODA_PLATA_ID, SUMA_TOTALA, DATA_PLATA, REZERVARE_ID) 
-            VALUES (bdd_admin.sec_plata_lowcost.nextval, :new.METODA_PLATA_ID, :new.SUMA_TOTALA, :new.DATA_PLATA, :new.REZERVARE_ID);
+            VALUES (seq_plata_lowcost.nextval, :new.METODA_PLATA_ID, :new.SUMA_TOTALA, :new.DATA_PLATA, :new.REZERVARE_ID);
         END IF;
     END IF;
     

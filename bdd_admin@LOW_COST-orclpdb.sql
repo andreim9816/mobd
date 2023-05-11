@@ -24,7 +24,7 @@ ORCLPDB_2 =
   )
 */
 
--- II.2) Crearea relatiiloe si a fragmentelor
+-- II.2) Crearea relatiilor si a fragmentelor
 
 drop table operator_zbor_lowcost;
 drop table zbor_lowcost;
@@ -275,6 +275,77 @@ FROM centralizat_admin.client;
 
 SELECT * FROM client_nongdpr;
 
+-- II.3) Furnizarea formelor de transparenta pentru intreg modelul ales
+-- Pentru fiecare tabela (care se afla in aceeasi baza de date sau nu) se creeaza un sinonim corespunzator, respectiv o vizualizare
+-- care cuprinde datele agregate din cele 2 fragmentari orizontale
+
+-- Operator Zbor
+CREATE OR REPLACE SYNONYM operator_zbor_nonlowcost
+    FOR bdd_admin.operator_zbor_nonlowcost@non_lowcost;
+
+CREATE OR REPLACE SYNONYM operator_zbor
+    FOR operator_zbor_lowcost;
+
+-- Zbor
+CREATE OR REPLACE SYNONYM zbor_nonlowcost
+    FOR bdd_admin.zbor_nonlowcost@non_lowcost;
+
+CREATE OR REPLACE SYNONYM zbor
+    FOR zbor_lowcost;
+
+-- Rezervare
+CREATE OR REPLACE SYNONYM rezervare_nonlowcost
+    FOR bdd_admin.rezervare_nonlowcost@non_lowcost;
+
+CREATE OR REPLACE SYNONYM rezervare
+    FOR rezervare_lowcost;
+
+-- Plata
+CREATE OR REPLACE SYNONYM plata_nonlowcost
+    FOR bdd_admin.plata_nonlowcost@non_lowcost;
+
+CREATE OR REPLACE SYNONYM plata
+    FOR plata_lowcost;
+
+-- Metoda Plata
+CREATE OR REPLACE SYNONYM metoda_plata_nonlowcost
+    FOR bdd_admin.metoda_plata@non_lowcost;
+
+CREATE OR REPLACE SYNONYM metoda_plata
+    FOR metoda_plata_lowcost;
+
+-- Clasa Zbor
+CREATE OR REPLACE SYNONYM clasa_zbor_nonlowcost
+    FOR bdd_admin.clasa_zbor@non_lowcost;
+
+CREATE OR REPLACE SYNONYM clasa_zbor
+    FOR clasa_zbor_lowcost;
+
+-- Aeronava
+CREATE OR REPLACE SYNONYM aeronava_nonlowcost
+    FOR bdd_admin.aeronava@non_lowcost;
+
+CREATE OR REPLACE SYNONYM aeronava
+    FOR aeronava_lowcost;
+
+-- Destinatie
+CREATE OR REPLACE SYNONYM destinatie_nonlowcost
+    FOR bdd_admin.destinatie@non_lowcost;
+
+CREATE OR REPLACE SYNONYM destinatie
+    FOR destinatie_lowcost;
+
+-- Stat
+CREATE OR REPLACE SYNONYM stat_nonlowcost
+    FOR bdd_admin.stat@non_lowcost;
+
+CREATE OR REPLACE SYNONYM stat
+    FOR stat_lowcost;
+
+-- Client
+CREATE OR REPLACE SYNONYM client_nongdpr_nonlowcost
+    FOR bdd_admin.client_nongdpr@non_lowcost;
+
 
 --constrangeri pentru fragmentul operator_zbor_low_cost
 --not null
@@ -299,7 +370,7 @@ declare
 nr number(1);
 begin
 select count(*) into nr
-from  operator_zbor_nonlowcost@non_lowcost
+from  operator_zbor_nonlowcost
 where nume = :new.nume;
 
 if (nr<>0) then
@@ -539,12 +610,6 @@ INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 1, CURRENT_DATE);
 INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 5, CURRENT_DATE);
 INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 1, null);
 
-
------ REPLICAREA
------ trigger unidirectional: client nongdpr, stat, metoda plata, clasa zbor
------ trigger bidirectional: destinatie
------ vizualizare materializata pentru tabela din non-low-cost: aeronava
-
 --- inserare date metoda plata si creare trigger
 ALTER TABLE metoda_plata
     add constraint nn_denumire_plata check (denumire is NOT NULL);
@@ -558,23 +623,31 @@ CREATE SEQUENCE sec_metoda_plata
     START WITH 24
     NOCYCLE;
 
+CREATE OR REPLACE SYNONYM seq_metoda_plata
+FOR sec_metoda_plata;
+
 INSERT INTO metoda_plata
 SELECT * FROM centralizat_admin.metoda_plata;
 
 SELECT * FROM metoda_plata;
+
+----- REPLICAREA
+----- trigger unidirectional: client nongdpr, stat, metoda plata, clasa zbor
+----- trigger bidirectional: destinatie
+----- vizualizare materializata pentru tabela din non-low-cost: aeronava
 
 CREATE OR REPLACE TRIGGER t_rep_metoda_plata
 AFTER INSERT OR UPDATE OR DELETE ON metoda_plata
 FOR EACH ROW
 BEGIN
     IF INSERTING THEN
-        INSERT INTO metoda_plata@non_lowcost
+        INSERT INTO metoda_plata_nonlowcost
         VALUES (:NEW.metoda_plata_id, :NEW.denumire);
     ELSIF DELETING THEN 
-        DELETE FROM metoda_plata@non_lowcost
+        DELETE FROM metoda_plata_nonlowcost
         WHERE metoda_plata_id = :OLD.metoda_plata_id;
     ELSE
-        UPDATE metoda_plata@non_lowcost
+        UPDATE metoda_plata_nonlowcost
         SET denumire = :NEW.denumire
         WHERE metoda_plata_id = :OLD.METODA_PLATA_ID;
     END IF;
@@ -616,6 +689,9 @@ CREATE SEQUENCE sec_clasa_zbor
     START WITH 24
     NOCYCLE;
 
+CREATE OR REPLACE SYNONYM seq_clasa_zbor
+FOR sec_clasa_zbor;
+
 INSERT INTO clasa_zbor
 SELECT * FROM centralizat_admin.clasa_zbor;
 
@@ -626,13 +702,13 @@ AFTER INSERT OR UPDATE OR DELETE ON clasa_zbor
 FOR EACH ROW
 BEGIN
     IF INSERTING THEN
-        INSERT INTO clasa_zbor@non_lowcost
+        INSERT INTO clasa_zbor_nonlowcost
         VALUES (:NEW.clasa_zbor_id, :NEW.denumire);
     ELSIF DELETING THEN 
-        DELETE FROM clasa_zbor@non_lowcost
+        DELETE FROM clasa_zbor_nonlowcost
         WHERE clasa_zbor_id = :OLD.clasa_zbor_id;
     ELSE
-        UPDATE clasa_zbor@non_lowcost
+        UPDATE clasa_zbor_nonlowcost
         SET denumire = :NEW.denumire
         WHERE clasa_zbor_id = :OLD.clasa_zbor_id;
     END IF;
@@ -680,13 +756,13 @@ AFTER INSERT OR UPDATE OR DELETE ON stat
 FOR EACH ROW
 BEGIN
     IF INSERTING THEN
-        INSERT INTO stat@non_lowcost
+        INSERT INTO stat_nonlowcost
         VALUES (:NEW.stat_id, :NEW.stat);
     ELSIF DELETING THEN 
-        DELETE FROM stat@non_lowcost
+        DELETE FROM stat_nonlowcost
         WHERE stat_id = :OLD.stat_id;
     ELSE
-        UPDATE stat@non_lowcost
+        UPDATE stat_nonlowcost
         SET stat = :NEW.stat
         WHERE stat_id = :OLD.stat_id;
     END IF;
@@ -723,13 +799,13 @@ AFTER INSERT OR UPDATE OR DELETE ON client_nongdpr
 FOR EACH ROW
 BEGIN
     IF INSERTING THEN
-        INSERT INTO client_nongdpr@non_lowcost
+        INSERT INTO client_nongdpr_nonlowcost
         VALUES (:NEW.client_id, :NEW.premium, :NEW.data_inregistrare);
     ELSIF DELETING THEN 
-        DELETE FROM client_nongdpr@non_lowcost
+        DELETE FROM client_nongdpr_nonlowcost
         WHERE client_id = :OLD.client_id;
     ELSE
-        UPDATE client_nongdpr@non_lowcost
+        UPDATE client_nongdpr_nonlowcost
         SET premium = :NEW.premium, data_inregistrare = :NEW.data_inregistrare
         WHERE client_id = :OLD.client_id;
     END IF;
@@ -828,13 +904,13 @@ AFTER INSERT OR UPDATE OR DELETE ON destinatie
 FOR EACH ROW
 BEGIN
     IF INSERTING THEN
-        INSERT INTO destinatie@non_lowcost
+        INSERT INTO destinatie_nonlowcost
         VALUES (:NEW.destinatie_id, :NEW.oras, :NEW.stat_id);
     ELSIF DELETING THEN 
-        DELETE FROM destinatie@non_lowcost
+        DELETE FROM destinatie_nonlowcost
         WHERE destinatie_id = :OLD.destinatie_id;
     ELSE
-        UPDATE destinatie@non_lowcost
+        UPDATE destinatie_nonlowcost
         SET oras = :NEW.oras, stat_id = :NEW.stat_id
         WHERE destinatie_id = :OLD.destinatie_id;
     END IF;
@@ -865,59 +941,3 @@ DELETE FROM destinatie
 WHERE destinatie_id = 'ABC';
 
 COMMIT;
-
--- II.4) Furnizarea formelor de transparenta pentru intreg modelul ales
--- Pentru fiecare tabela (care se afla in aceeasi baza de date sau nu) se creeaza un sinonim corespunzator, respectiv o vizualizare
--- care cuprinde datele agregate din cele 2 fragmentari orizontale
-
--- Operator Zbor
-CREATE OR REPLACE SYNONYM operator_zbor_nonlowcost
-FOR bdd_admin.operator_zbor_nonlowcost@non_lowcost;
-
-CREATE OR REPLACE SYNONYM operator_zbor
-FOR operator_zbor_lowcost;
-
--- Zbor
-CREATE OR REPLACE SYNONYM zbor_nonlowcost
-FOR bdd_admin.zbor_nonlowcost@non_lowcost;
-
-CREATE OR REPLACE SYNONYM zbor
-FOR zbor_lowcost;
-
--- Rezervare
-CREATE OR REPLACE SYNONYM rezervare_nonlowcost
-FOR bdd_admin.rezervare_nonlowcost@non_lowcost;
-
-CREATE OR REPLACE SYNONYM rezervare
-FOR rezervare_lowcost;
-
--- Plata
-CREATE OR REPLACE SYNONYM plata_nonlowcost
-FOR bdd_admin.plata_nonlowcost@non_lowcost;
-
-CREATE OR REPLACE SYNONYM plata
-FOR plata_lowcost;
-
--- Metoda Plata
-CREATE OR REPLACE SYNONYM metoda_plata_nonlowcost
-FOR bdd_admin.metoda_plata_nonlowcost@non_lowcost;
-
--- Clasa Zbor
-CREATE OR REPLACE SYNONYM clasa_zbor_nonlowcost
-FOR bdd_admin.clasa_zbor_nonlowcost@non_lowcost;
-
--- Aeronava
-CREATE OR REPLACE SYNONYM aeronava_nonlowcost
-FOR bdd_admin.aeronava_nonlowcost@non_lowcost;
-
--- Destinatie
-CREATE OR REPLACE SYNONYM destinatie_nonlowcost
-FOR bdd_admin.destinatie_nonlowcost@non_lowcost;
-
--- Stat
-CREATE OR REPLACE SYNONYM stat_nonlowcost
-FOR bdd_admin.stat_nonlowcost@non_lowcost;
-
--- Client
-CREATE OR REPLACE SYNONYM client_nongdpr_nonlowcost
-FOR bdd_admin.client_nongdpr_nonlowcost@non_lowcost;

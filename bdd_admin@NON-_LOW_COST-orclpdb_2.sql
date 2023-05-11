@@ -186,28 +186,20 @@ select * from operator_zbor_nonlowcost;
 
 --local
 insert into operator_zbor_nonlowcost
-values ( sec_op_zbor_nonlowcost.nextval, 'Hawaiian Airlines Inc.', 'tip1');
+values ('A', 'Hawaiian Airlines Inc.', 'tip1');
 
 --global
 insert into operator_zbor_nonlowcost
-values ( sec_op_zbor_nonlowcost.nextval, 'United Air Lines Inc.', 'tip1');
-
-CREATE SEQUENCE sec_op_zbor_nonlowcost
-    INCREMENT BY 2
-    START WITH 16
-    NOCYCLE;
-
-CREATE OR REPLACE SYNONYM seq_operator_zbor
-FOR sec_op_zbor_nonlowcost;
+values ('B', 'United Air Lines Inc.', 'tip1');
 
 insert into operator_zbor_nonlowcost
-values ( sec_op_zbor_nonlowcost.nextval, null, 'tip1');
+values ('1', null, 'tip1');
 
 insert into operator_zbor_nonlowcost
-values ( sec_op_zbor_nonlowcost.nextval, 'nume1', null);
+values ('2', 'nume1', null);
 
 insert into operator_zbor_nonlowcost
-values ( sec_op_zbor_nonlowcost.nextval, 'nume1', 'tip1');
+values ('3', 'nume1', 'tip1');
 
 select * from operator_zbor_nonlowcost;
 
@@ -408,6 +400,9 @@ ALTER TABLE metoda_plata
 alter table metoda_plata
     add constraint pk_metoda_plata primary key (metoda_plata_id);
 
+CREATE OR REPLACE SYNONYM seq_metoda_plata
+    FOR bdd_admin.seq_metoda_plata@lowcost;
+
 INSERT INTO metoda_plata
 SELECT * FROM metoda_plata@centralizat;
 
@@ -420,6 +415,9 @@ ALTER TABLE clasa_zbor
 --primary key
 alter table clasa_zbor
     add constraint pk_clasa_zbor primary key (clasa_zbor_id);
+
+CREATE SYNONYM seq_clasa_zbor
+    FOR bdd_admin.seq_clasa_zbor@lowcost;
 
 INSERT INTO clasa_zbor
 SELECT * FROM clasa_zbor@centralizat;
@@ -487,7 +485,7 @@ SELECT * FROM destinatie@centralizat;
 
 SELECT * FROM destinatie
 ORDER BY 1;
--- II.4) Furnizarea formelor de transparenta pentru intreg modelul ales
+-- II.3) Furnizarea formelor de transparenta pentru intreg modelul ales
 -- Pentru fiecare tabela (care se afla in aceeasi baza de date sau nu) se creeaza un sinonim corespunzator, respectiv o vizualizare
 -- care cuprinde datele agregate din cele 2 fragmentari orizontale
 
