@@ -346,6 +346,14 @@ CREATE OR REPLACE SYNONYM stat
 CREATE OR REPLACE SYNONYM client_nongdpr_nonlowcost
     FOR bdd_admin.client_nongdpr@non_lowcost;
 
+CREATE OR REPLACE SYNONYM client_gdpr
+    FOR global_admin.client_gdpr;
+
+CREATE OR REPLACE VIEW client
+AS SELECT gdpr.client_id, gdpr.nume, gdpr.prenume, gdpr.email, gdpr.numar_telefon, non.data_inregistrare,non.premium
+    FROM client_gdpr gdpr
+    JOIN client_nongdpr non ON gdpr.client_id = non.client_id;
+
 
 --constrangeri pentru fragmentul operator_zbor_low_cost
 --not null

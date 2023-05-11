@@ -95,6 +95,7 @@ END;
 BEGIN
     grant_select('centralizat_admin','bdd_admin');
     grant_select('centralizat_admin', 'global_admin');
+    grant_select('global_admin','bdd_admin');
 END;
 /
 

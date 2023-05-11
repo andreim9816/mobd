@@ -15,8 +15,14 @@ CONNECT TO centralizat_admin
 IDENTIFIED BY centralizat_admin
 USING 'orclpdb';
 
+CREATE DATABASE LINK global
+CONNECT TO global_admin
+IDENTIFIED BY global_admin
+USING 'orclpdb';
+
 SELECT * FROM tab@lowcost;
 SELECT * FROM tab@centralizat;
+SELECT * FROM tab@global;
 
 -- legaturile de baze de date la care are acces utilizatorul conectat
 SELECT OWNER, USERNAME, DB_LINK, HOST
@@ -498,45 +504,65 @@ FOR operator_zbor_nonlowcost;
 
 -- Zbor
 CREATE OR REPLACE SYNONYM zbor_lowcost
-FOR bdd_admin.zbor_nonlowcost@lowcost;
+FOR bdd_admin.zbor_lowcost@lowcost;
 
 CREATE OR REPLACE SYNONYM zbor
 FOR zbor_nonlowcost;
 
 -- Rezervare
 CREATE OR REPLACE SYNONYM rezervare_lowcost
-FOR bdd_admin.rezervare_nonlowcost@lowcost;
+FOR bdd_admin.rezervare_lowcost@lowcost;
 
 CREATE OR REPLACE SYNONYM rezervare
 FOR rezervare_nonlowcost;
 
 -- Plata
 CREATE OR REPLACE SYNONYM plata_lowcost
-FOR bdd_admin.plata_nonlowcost@lowcost;
+FOR bdd_admin.plata_lowcost@lowcost;
 
 CREATE OR REPLACE SYNONYM plata
 FOR plata_nonlowcost;
 
 -- Metoda Plata
 CREATE OR REPLACE SYNONYM metoda_plata_lowcost
-FOR bdd_admin.metoda_plata_nonlowcost@lowcost;
+FOR bdd_admin.metoda_plata_lowcost@lowcost;
 
 -- Clasa Zbor
 CREATE OR REPLACE SYNONYM clasa_zbor_lowcost
-FOR bdd_admin.clasa_zbor_nonlowcost@lowcost;
+FOR bdd_admin.clasa_zbor_lowcost@lowcost;
 
 -- Aeronava
 CREATE OR REPLACE SYNONYM aeronava_lowcost
-FOR bdd_admin.aeronava_nonlowcost@lowcost;
+FOR bdd_admin.aeronava_lowcost@lowcost;
 
 -- Destinatie
 CREATE OR REPLACE SYNONYM destinatie_lowcost
-FOR bdd_admin.destinatie_nonlowcost@lowcost;
+FOR bdd_admin.destinatie_lowcost@lowcost;
 
 -- Stat
 CREATE OR REPLACE SYNONYM stat_lowcost
-FOR bdd_admin.stat_nonlowcost@lowcost;
+FOR bdd_admin.stat_lowcost@lowcost;
+
+select count(*) from client_nongdpr;
+select client0_.CLIENT_ID as client_id1_2_0_, 
+client0_.DATA_INREGISTRARE as data_inregistrare2_2_0_,
+client0_.email as email3_2_0_, 
+client0_.NUMAR_TELEFON as numar_telefon4_2_0_,
+client0_.nume as nume5_2_0_, 
+client0_.PREMIUM as premium6_2_0_,
+client0_.prenume as prenume7_2_0_ 
+from CLIENT client0_ where client0_.CLIENT_ID=1;
 
 -- Client
 CREATE OR REPLACE SYNONYM client_nongdpr_lowcost
-FOR bdd_admin.client_nongdpr_nonlowcost@lowcost;
+FOR bdd_admin.client_nongdpr@lowcost;
+
+CREATE OR REPLACE SYNONYM client_gdpr
+FOR global_admin.client_gdpr@global;
+
+CREATE OR REPLACE VIEW client AS 
+SELECT gdpr.client_id, gdpr.nume, gdpr.prenume, gdpr.email, gdpr.numar_telefon, non.data_inregistrare,non.premium
+   FROM client_gdpr gdpr
+   JOIN client_nongdpr non ON gdpr.client_id = non.client_id;
+
+select * from client;
