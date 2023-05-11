@@ -399,24 +399,65 @@ alter table client_nongdpr
 alter table client_nongdpr
     add constraint pk_client_nongdpr primary key (client_id);
 
-INSERT INTO client_nongdpr VALUES (10001, 1, CURRENT_DATE);
-INSERT INTO client_nongdpr VALUES (10002, 5, CURRENT_DATE);
-INSERT INTO client_nongdpr VALUES (10003, 1, null);
+CREATE SEQUENCE sec_client_nongdpr
+    INCREMENT BY 1
+    START WITH 10003
+    NOCYCLE;
+
+INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 1, CURRENT_DATE);
+INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 5, CURRENT_DATE);
+INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 1, null);
 
 --- REPLICARE
 --- metoda plata
+ALTER TABLE metoda_plata
+    add constraint nn_denumire_plata check (denumire is NOT NULL);
+
+--primary key
+alter table metoda_plata
+    add constraint pk_metoda_plata primary key (metoda_plata_id);
+
+CREATE SEQUENCE sec_metoda_plata
+    INCREMENT BY 1
+    START WITH 24
+    NOCYCLE;
+
 INSERT INTO metoda_plata
 SELECT * FROM metoda_plata@centralizat;
 
 SELECT * FROM metoda_plata;
 
 -- clasa zbor
+ALTER TABLE clasa_zbor
+    add constraint nn_denumire_clasa_zbor check (denumire is NOT NULL);
+
+--primary key
+alter table clasa_zbor
+    add constraint pk_clasa_zbor primary key (clasa_zbor_id);
+
+CREATE SEQUENCE sec_clasa_zbor
+    INCREMENT BY 1
+    START WITH 24
+    NOCYCLE;
+
 INSERT INTO clasa_zbor
 SELECT * FROM clasa_zbor@centralizat;
 
 SELECT * FROM clasa_zbor;
 
 -- stat
+ALTER TABLE stat
+    add constraint nn_denumire_stat check (stat is NOT NULL);
+
+--primary key
+alter table stat
+    add constraint pk_stat primary key (stat_id);
+
+CREATE SEQUENCE sec_stat
+    INCREMENT BY 1
+    START WITH 55
+    NOCYCLE;
+
 INSERT INTO stat
 SELECT * FROM stat@centralizat;
 
@@ -427,6 +468,21 @@ SELECT * FROM client_nongdpr
 ORDER BY 1 DESC;
 
 -- aeronava: cream o vizualizare materializata
+ALTER TABLE aeronava
+    add constraint nn_producator_aeronava check (producator is NOT NULL);
+
+ALTER TABLE aeronava
+    add constraint nn_nume_aeronava check (nume is NOT NULL);
+
+--primary key
+alter table aeronava
+    add constraint pk_aeronava primary key (aeronava_id);
+
+CREATE SEQUENCE sec_aeronava
+    INCREMENT BY 1
+    START WITH 147
+    NOCYCLE;
+
 CREATE MATERIALIZED VIEW aeronava
 REFRESH FAST
 START WITH SYSDATE
@@ -444,6 +500,22 @@ FROM mlog$_aeronava@lowcost;
 EXECUTE DBMS_MVIEW.REFRESH(UPPER('aeronava'), 'F');
 
 --- replicare destinatie
+ALTER TABLE destinatie
+    add constraint nn_oras_destinatie check (oras is NOT NULL);
+
+--primary key
+alter table destinatie
+    add constraint pk_destinatie primary key (destinatie_id);
+
+CREATE SEQUENCE sec_destinatie
+    INCREMENT BY 1
+    START WITH 323
+    NOCYCLE;
+
+alter table destinatie
+    add constraint fk_destinatie_stat FOREIGN key
+        (stat_id) REFERENCES stat(stat_id);
+
 INSERT INTO destinatie
 SELECT * FROM destinatie@centralizat;
 
