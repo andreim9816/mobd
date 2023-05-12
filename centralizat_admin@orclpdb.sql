@@ -13,7 +13,6 @@ drop sequence metoda_plata_seq;
 
 CREATE TABLE AERONAVA(
     aeronava_id varchar2(40) PRIMARY KEY,
-    producator VARCHAR2(60) NOT NULL,
     nume VARCHAR2(60) NOT NULL
 );
 

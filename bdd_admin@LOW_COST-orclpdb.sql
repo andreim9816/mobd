@@ -40,7 +40,6 @@ drop table destinatie;
 -- crearea tabelelor
 CREATE TABLE AERONAVA(
     aeronava_id varchar2(40),
-    producator VARCHAR2(60),
     nume VARCHAR2(60)
 );
 
@@ -613,7 +612,11 @@ CREATE SEQUENCE sec_client_nongdpr
     START WITH 10003
     NOCYCLE;
 
-
+CREATE OR REPLACE SYNONYM seq_client
+    FOR sec_client_nongdpr;
+    
+select seq_client.nextval from dual;
+    
 INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 1, CURRENT_DATE);
 INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 5, CURRENT_DATE);
 INSERT INTO client_nongdpr VALUES (sec_client_nongdpr.nextval, 1, null);
@@ -800,7 +803,8 @@ SELECT * FROM stat;
 COMMIT;
 
 --- inserare date client_nongdpr si creare trigger
-SELECT * FROM client_nongdpr;
+SELECT * FROM client_nongdpr_nonlowcost;
+SELECT * FROM client_gdpr;
 
 CREATE OR REPLACE TRIGGER t_rep_client_nongdpr
 AFTER INSERT OR UPDATE OR DELETE ON client_nongdpr
@@ -815,6 +819,32 @@ BEGIN
     ELSE
         UPDATE client_nongdpr_nonlowcost
         SET premium = :NEW.premium, data_inregistrare = :NEW.data_inregistrare
+        WHERE client_id = :OLD.client_id;
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER t_client
+INSTEAD OF INSERT OR UPDATE OR DELETE ON client
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO client_nongdpr_nonlowcost
+        VALUES (:NEW.client_id, :NEW.premium, :NEW.data_inregistrare);
+        INSERT INTO client_gdpr (CLIENT_ID, NUME, PRENUME, EMAIL, NUMAR_TELEFON)
+        VALUES (:NEW.client_id, :NEW.nume, :NEW.prenume, :NEW.email, :NEW.numar_telefon);
+    ELSIF DELETING THEN
+        DELETE FROM client_nongdpr_nonlowcost
+        WHERE client_id = :OLD.client_id;
+        DELETE FROM client_gdpr
+        WHERE client_id = :OLD.client_id;
+    ELSE
+        UPDATE client_nongdpr_nonlowcost
+        SET premium = :NEW.premium, data_inregistrare = :NEW.data_inregistrare
+        WHERE client_id = :OLD.client_id;
+
+        UPDATE client_gdpr
+        SET nume = :NEW.nume, prenume = :NEW.prenume, email = :NEW.email, numar_telefon = :NEW.numar_telefon
         WHERE client_id = :OLD.client_id;
     END IF;
 END;
@@ -843,8 +873,6 @@ SELECT * FROM client_nongdpr ORDER BY 1 DESC;
 COMMIT;
 
 -- inserare date aeronava
-ALTER TABLE aeronava
-    add constraint nn_producator_aeronava check (producator is NOT NULL);
 
 ALTER TABLE aeronava
     add constraint nn_nume_aeronava check (nume is NOT NULL);
@@ -867,7 +895,7 @@ WITH PRIMARY KEY;
 
 -- verificare insert
 INSERT INTO aeronava
-VALUES ('AAA-9', 'BOEING Bros', 'Boeing 181-294-142');
+VALUES ('AAA-9', 'Boeing 181-294-142');
 
 SELECT * FROM aeronava
 ORDER BY 1;
@@ -876,7 +904,7 @@ COMMIT;
 
 -- verificare update
 UPDATE aeronava
-SET producator = 'BOEING BROS'
+SET nume = 'BOEING BROS'
 WHERE aeronava_id = '0000';
 
 SELECT * FROM aeronava

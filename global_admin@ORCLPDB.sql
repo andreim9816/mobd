@@ -226,6 +226,9 @@ JOIN client_gdpr gdpr on ngdpr.client_id = gdpr.client_id;
 SELECT * FROM client;
 
 -- Sinonime pentru secvente
+CREATE OR REPLACE SYNONYM seq_client
+    for bdd_admin.sec_client_nongdpr;
+
 create or replace synonym seq_plata
  for bdd_admin.seq_plata;
 
@@ -496,8 +499,8 @@ FOR EACH ROW
 DECLARE
 BEGIN
     IF INSERTING THEN     
-        INSERT INTO aeronava_lowcost (PRODUCATOR, NUME, AERONAVA_ID) 
-        VALUES(:new.PRODUCATOR, :new.NUME, :new.AERONAVA_ID);
+        INSERT INTO aeronava_lowcost (NUME, AERONAVA_ID)
+        VALUES(:new.NUME, :new.AERONAVA_ID);
     END IF;
     
     IF DELETING THEN

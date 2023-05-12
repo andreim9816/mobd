@@ -448,8 +448,6 @@ SELECT * FROM client_nongdpr
 ORDER BY 1 DESC;
 
 -- aeronava: cream o vizualizare materializata
-ALTER TABLE aeronava
-    add constraint nn_producator_aeronava check (producator is NOT NULL);
 
 ALTER TABLE aeronava
     add constraint nn_nume_aeronava check (nume is NOT NULL);
