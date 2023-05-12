@@ -28,6 +28,8 @@ GRANT CREATE SEQUENCE TO administrator;
 GRANT CREATE SYNONYM TO administrator;
 GRANT CREATE VIEW TO administrator;
 GRANT CREATE TRIGGER TO administrator;
+GRANT CREATE ANY INDEX TO administrator;
+GRANT ANALYZE ANY TO administrator;
 
 -- afisam rolul creat
 SELECT * FROM role_sys_privs
