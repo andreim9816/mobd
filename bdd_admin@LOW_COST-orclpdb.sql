@@ -904,17 +904,19 @@ COMMIT;
 
 -- verificare update
 UPDATE aeronava
-SET nume = 'BOEING BROS'
-WHERE aeronava_id = '0000';
+SET nume = 'Boeing 200-200-200'
+WHERE aeronava_id = 'AAA-9';
 
 SELECT * FROM aeronava
 ORDER BY 1;
 
 COMMIT;
+SELECT * 
+FROM mlog$_aeronava;
 
 -- verificare delete
 DELETE FROM aeronava
-WHERE aeronava_id = '0000';
+WHERE aeronava_id = 'AAA-9';
 
 COMMIT;
 
