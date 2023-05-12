@@ -977,3 +977,184 @@ DELETE FROM destinatie
 WHERE destinatie_id = 'ABC';
 
 COMMIT;
+
+
+
+
+
+--cererea
+SELECT
+    gdpr.client_id, SUM(suma_totala) "Suma de restituit", SUM(nr_pasageri) "Nr pasageri afectati"
+FROM rezervare_lowcost r
+         JOIN zbor_lowcost z ON (r.zbor_id = z.zbor_id)
+         JOIN plata_lowcost p ON (p.rezervare_id = r.rezervare_id)
+         JOIN global_admin.client_gdpr gdpr ON (r.client_id = gdpr.client_id)
+WHERE  z.data_plecare BETWEEN TO_DATE('2015-02-01 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+    AND TO_DATE('2015-02-28 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+  AND z.anulat = 1
+  AND (gdpr.numar_telefon LIKE '001-%' or gdpr.numar_telefon LIKE '+1%')
+group BY gdpr.client_id;
+
+select sum(suma_totala), sum(nr_pasageri)
+from rezervare_lowcost r join plata_lowcost p on (p.rezervare_id = r.rezervare_id)
+                         join zbor z on (r.zbor_id = z.zbor_id)
+where client_id = 964 and anulat = 1;
+
+
+ALTER SESSION SET OPTIMIZER_MODE = rule;
+
+--rule
+EXPLAIN PLAN
+SET STATEMENT_ID = 'st1_lowcost'
+FOR
+SELECT
+    gdpr.client_id, SUM(suma_totala) "Suma de restituit", SUM(nr_pasageri) "Nr pasageri afectati"
+FROM rezervare_lowcost r
+         JOIN zbor_lowcost z ON (r.zbor_id = z.zbor_id)
+         JOIN plata_lowcost p ON (p.rezervare_id = r.rezervare_id)
+         JOIN global_admin.client_gdpr gdpr ON (r.client_id = gdpr.client_id)
+WHERE  z.data_plecare BETWEEN TO_DATE('2015-02-01 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+    AND TO_DATE('2015-02-28 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+  AND z.anulat = 1
+  AND (gdpr.numar_telefon LIKE '001-%' or gdpr.numar_telefon LIKE '+1%')
+group BY gdpr.client_id;
+
+SELECT plan_table_output FROM
+    table(dbms_xplan.display('PLAN_TABLE', 'st1_lowcost','SERIAL'));
+
+--all rows
+ALTER SESSION SET OPTIMIZER_MODE = all_rows;
+
+EXPLAIN PLAN
+SET STATEMENT_ID = 'st2_lowcost'
+FOR
+SELECT
+    gdpr.client_id, SUM(suma_totala) "Suma de restituit", SUM(nr_pasageri) "Nr pasageri afectati"
+FROM rezervare_lowcost r
+         JOIN zbor_lowcost z ON (r.zbor_id = z.zbor_id)
+         JOIN plata_lowcost p ON (p.rezervare_id = r.rezervare_id)
+         JOIN global_admin.client_gdpr gdpr ON (r.client_id = gdpr.client_id)
+WHERE  z.data_plecare BETWEEN TO_DATE('2015-02-01 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+    AND TO_DATE('2015-02-28 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+  AND z.anulat = 1
+  AND (gdpr.numar_telefon LIKE '001-%' or gdpr.numar_telefon LIKE '+1%')
+group BY gdpr.client_id;
+
+SELECT plan_table_output FROM
+    table(dbms_xplan.display('PLAN_TABLE', 'st2_lowcost'));
+
+--choose
+ALTER SESSION SET OPTIMIZER_MODE = CHOOSE;
+
+EXPLAIN PLAN
+SET STATEMENT_ID = 'st3_lowcost'
+FOR
+SELECT
+    gdpr.client_id, SUM(suma_totala) "Suma de restituit", SUM(nr_pasageri) "Nr pasageri afectati"
+FROM rezervare_lowcost r
+         JOIN zbor_lowcost z ON (r.zbor_id = z.zbor_id)
+         JOIN plata_lowcost p ON (p.rezervare_id = r.rezervare_id)
+         JOIN global_admin.client_gdpr gdpr ON (r.client_id = gdpr.client_id)
+WHERE  z.data_plecare BETWEEN TO_DATE('2015-02-01 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+    AND TO_DATE('2015-02-28 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+  AND z.anulat = 1
+  AND (gdpr.numar_telefon LIKE '001-%' or gdpr.numar_telefon LIKE '+1%')
+group BY gdpr.client_id;
+
+SELECT plan_table_output FROM
+    table(dbms_xplan.display('PLAN_TABLE', 'st3_lowcost'));
+
+
+--colectam statistici
+select NUM_ROWS, GLOBAL_STATS, LAST_ANALYZED
+from   USER_TABLES
+where  table_name in (upper('zbor_lowcost'),upper('rezervare_lowcost'), upper('plata_lowcost'),
+                      upper('clasa_zbor'), upper('client_nongdpr'));
+
+ANALYZE TABLE zbor_lowcost COMPUTE STATISTICS;
+ANALYZE TABLE rezervare_lowcost COMPUTE STATISTICS;
+ANALYZE TABLE plata_lowcost COMPUTE STATISTICS;
+ANALYZE TABLE clasa_zbor COMPUTE STATISTICS;
+ANALYZE TABLE client_nongdpr COMPUTE STATISTICS;
+ANALYZE TABLE global_admin.client_gdpr COMPUTE STATISTICS;
+
+
+ALTER SESSION SET OPTIMIZER_MODE = choose;
+
+--choose
+EXPLAIN PLAN
+SET STATEMENT_ID = 'st4_lowcost'
+FOR SELECT
+                                                                      gdpr.client_id, SUM(suma_totala) "Suma de restituit", SUM(nr_pasageri) "Nr pasageri afectati"
+    FROM rezervare_lowcost r
+             JOIN zbor_lowcost z ON (r.zbor_id = z.zbor_id)
+             JOIN plata_lowcost p ON (p.rezervare_id = r.rezervare_id)
+             JOIN global_admin.client_gdpr gdpr ON (r.client_id = gdpr.client_id)
+    WHERE  z.data_plecare BETWEEN TO_DATE('2015-02-01 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+        AND TO_DATE('2015-02-28 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+      AND z.anulat = 1
+      AND (gdpr.numar_telefon LIKE '001-%' or gdpr.numar_telefon LIKE '+1%')
+    group BY gdpr.client_id;
+
+SELECT plan_table_output FROM
+    table(dbms_xplan.display('PLAN_TABLE', 'st4_lowcost'));
+
+ALTER SESSION SET OPTIMIZER_MODE = rule;
+
+--rule
+EXPLAIN PLAN
+SET STATEMENT_ID = 'st5_lowcost'
+FOR
+SELECT
+    gdpr.client_id, SUM(suma_totala) "Suma de restituit", SUM(nr_pasageri) "Nr pasageri afectati"
+FROM rezervare_lowcost r
+         JOIN zbor_lowcost z ON (r.zbor_id = z.zbor_id)
+         JOIN plata_lowcost p ON (p.rezervare_id = r.rezervare_id)
+         JOIN global_admin.client_gdpr gdpr ON (r.client_id = gdpr.client_id)
+WHERE  z.data_plecare BETWEEN TO_DATE('2015-02-01 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+    AND TO_DATE('2015-02-28 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+  AND z.anulat = 1
+  AND (gdpr.numar_telefon LIKE '001-%' or gdpr.numar_telefon LIKE '+1%')
+group BY gdpr.client_id;
+
+SELECT plan_table_output FROM
+    table(dbms_xplan.display('PLAN_TABLE', 'st5_lowcost'));
+
+
+--Adaug index
+CREATE BITMAP INDEX idx_zbor_anulat ON zbor_lowcost(anulat);
+ANALYZE INDEX idx_zbor_anulat compute statistics;
+
+DROP INDEX idx_zbor_anulat;
+
+CREATE INDEX idx_nr_tel ON global_admin.client_gdpr(numar_telefon);
+ANALYZE INDEX idx_nr_tel compute statistics;
+
+DROP INDEX idx_nr_tel;
+
+CREATE BITMAP INDEX idx_client_id ON rezervare_lowcost(client_id);
+ANALYZE INDEX idx_client_id compute statistics;
+
+CREATE INDEX idx_plata_id ON plata_lowcost(rezervare_id);
+ANALYZE INDEX idx_plata_id delete statistics;
+
+ALTER SESSION SET OPTIMIZER_MODE = choose;
+
+--choose
+EXPLAIN PLAN
+SET STATEMENT_ID = 'st8_lowcost'
+FOR
+SELECT
+    gdpr.client_id, SUM(suma_totala) "Suma de restituit", SUM(nr_pasageri) "Nr pasageri afectati"
+FROM rezervare_lowcost r
+         JOIN zbor_lowcost z ON (r.zbor_id = z.zbor_id)
+         JOIN plata_lowcost p ON (p.rezervare_id = r.rezervare_id)
+         JOIN global_admin.client_gdpr gdpr ON (r.client_id = gdpr.client_id)
+WHERE  z.data_plecare BETWEEN TO_DATE('2015-02-01 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+    AND TO_DATE('2015-02-28 00:00:00', 'YYYY-MM-DD hh24:mi:ss')
+  AND z.anulat = 1
+  AND (gdpr.numar_telefon LIKE '001-%' or gdpr.numar_telefon LIKE '+1%')
+group BY gdpr.client_id;
+
+SELECT plan_table_output FROM
+    table(dbms_xplan.display('PLAN_TABLE', 'st8_lowcost'));
